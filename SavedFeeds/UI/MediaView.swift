@@ -95,7 +95,7 @@ struct VideoTile: View {
     var body: some View {
         ZStack {
             if let player {
-                VideoPlayer(player: player)
+                PlayerView(player: player, showsControls: !loops)
             } else {
                 RemoteImage(url: media.image)
                 Button(action: play) {
@@ -129,5 +129,24 @@ struct VideoTile: View {
         player?.pause()
         player = nil
         looper = nil
+    }
+}
+
+/// AppKit's player view. SwiftUI's `VideoPlayer` aborts as soon as it's created on macOS 27.0.1.
+private struct PlayerView: NSViewRepresentable {
+    let player: AVPlayer
+    let showsControls: Bool
+
+    func makeNSView(context: Context) -> AVPlayerView {
+        let view = AVPlayerView()
+        view.player = player
+        view.controlsStyle = showsControls ? .floating : .none
+        view.showsFullScreenToggleButton = true
+        view.videoGravity = .resizeAspect
+        return view
+    }
+
+    func updateNSView(_ view: AVPlayerView, context: Context) {
+        if view.player !== player { view.player = player }
     }
 }
