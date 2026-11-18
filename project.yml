@@ -1,0 +1,54 @@
+name: SavedFeeds
+options:
+  bundleIdPrefix: com.hreinsson
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    DEVELOPMENT_TEAM: 8FB39RNRQQ
+    SWIFT_VERSION: "6.0"
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+targets:
+  SavedFeeds:
+    type: application
+    platform: macOS
+    sources:
+      - SavedFeeds
+    entitlements:
+      path: SavedFeeds/SavedFeeds.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+    info:
+      path: SavedFeeds/Info.plist
+      properties:
+        CFBundleDisplayName: SavedFeeds
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSApplicationCategoryType: public.app-category.social-networking
+        LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
+        NSHumanReadableCopyright: © 2026 Hlynur Hreinsson
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hreinsson.SavedFeeds
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme:
+      testTargets:
+        - SavedFeedsTests
+  SavedFeedsTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - SavedFeedsTests
+    dependencies:
+      - target: SavedFeeds
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.hreinsson.SavedFeedsTests
