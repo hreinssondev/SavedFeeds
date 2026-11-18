@@ -85,7 +85,7 @@ struct RemoteImage: View {
     }
 }
 
-/// Poster with a play button; loops start on their own, muted.
+/// Poster with a play button, the whole poster starts it; loops start on their own, muted.
 struct VideoTile: View {
     let media: Media
     let loops: Bool
@@ -97,12 +97,15 @@ struct VideoTile: View {
             if let player {
                 PlayerView(player: player, showsControls: !loops)
             } else {
-                RemoteImage(url: media.image)
                 Button(action: play) {
-                    Image(systemName: "play.circle.fill")
-                        .font(.system(size: 56))
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(.white, .black.opacity(0.5))
+                    ZStack {
+                        RemoteImage(url: media.image)
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: 56))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .black.opacity(0.5))
+                    }
+                    .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
             }
