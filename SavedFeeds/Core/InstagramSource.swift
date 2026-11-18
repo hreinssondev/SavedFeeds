@@ -51,7 +51,7 @@ enum InstagramParser {
             community: nil, title: nil, text: item.caption?.text,
             permalink: permalink, link: nil, media: parts.compactMap(\.media),
             date: Date(timeIntervalSince1970: item.taken_at ?? 0),
-            score: item.like_count, comments: item.comment_count
+            score: item.like_count, comments: item.comment_count, mediaID: item.pk?.value
         )
     }
 
@@ -76,6 +76,7 @@ enum InstagramParser {
     }
 
     struct Item: Decodable {
+        let pk: LooseString?
         let code: String?
         let taken_at: Double?
         let image_versions2: Versions?

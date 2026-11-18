@@ -80,6 +80,8 @@ struct InstagramParserTests {
         #expect(page.posts.map(\.id) == ["ig_ABC", "ig_VID", "ig_CAR"])
 
         let photo = page.posts[0]
+        #expect(photo.mediaID == "3141")
+        #expect(page.posts[1].mediaID == "3142")
         #expect(photo.author == "photog")
         #expect(photo.text == "Sunset")
         #expect(photo.score == 120)
@@ -121,6 +123,44 @@ struct SafariHandoffTests {
         #expect(cookies[0].isSecure && cookies[0].isHTTPOnly)
         #expect(abs((cookies[0].expiresDate?.timeIntervalSince1970 ?? 0) - expiry) < 1)
         #expect(cookies[1].expiresDate == nil && !cookies[1].isSecure)
+    }
+}
+
+struct CommentParserTests {
+    @Test func redditThreadsWithMoreStubs() throws {
+        let json = #"""
+        [{"kind":"Listing","data":{"children":[{"kind":"t3","data":{"name":"t3_p","title":"Post"}}]}},
+         {"kind":"Listing","data":{"children":[
+           {"kind":"t1","data":{"name":"t1_a","author":"ann","body":"Top **one**","score":12,"created_utc":1700000000,"is_submitter":true,
+             "replies":{"kind":"Listing","data":{"children":[
+               {"kind":"t1","data":{"name":"t1_b","author":"bob","body":"Reply","score":3,"created_utc":1700000100,"replies":""}},
+               {"kind":"more","data":{"count":4,"children":["x","y"]}}]}}}},
+           {"kind":"t1","data":{"name":"t1_c","author":"cat","body":"Top two","score":-2,"created_utc":1700000200,"replies":""}},
+           {"kind":"more","data":{"count":17,"children":["z"]}}]}}]
+        """#
+        let page = try RedditComments.page(from: Data(json.utf8))
+        #expect(page.comments.map(\.id) == ["t1_a", "t1_c"])
+        #expect(page.more == 17)
+        #expect(page.next == nil)
+        let top = page.comments[0]
+        #expect(top.isSubmitter && top.score == 12 && top.text == "Top **one**")
+        #expect(top.replies.map(\.author) == ["bob"])
+        #expect(top.moreReplies == 4)
+        #expect(page.comments[1].replies.isEmpty)
+    }
+
+    @Test func instagramCommentsPageAndReplies() throws {
+        let json = #"{"comments":[{"pk":"111","text":"Nice","created_at":1700000000,"user":{"username":"ann"},"comment_like_count":5,"child_comment_count":3,"preview_child_comments":[{"pk":222,"text":"Agreed","created_at":1700000100,"user":{"username":"bob"}}]},{"pk":"333","text":"Wow","user":{"username":"cat"}}],"comment_count":48,"has_more_comments":false,"has_more_headload_comments":true,"next_min_id":"{\"cursor\":1}","status":"ok"}"#
+        let page = try InstagramComments.page(from: Data(json.utf8))
+        #expect(page.comments.map(\.id) == ["111", "333"])
+        #expect(page.next == #"{"cursor":1}"#)
+        #expect(page.total == 48)
+        #expect(page.comments[0].replies.map(\.id) == ["222"])
+        #expect(page.comments[0].moreReplies == 2)
+
+        let replies = try InstagramComments.replies(from: Data(#"{"child_comments":[{"pk":"444","text":"Later","user":{"username":"dan"}}],"has_more_tail_child_comments":false,"status":"ok"}"#.utf8))
+        #expect(replies.comments.map(\.author) == ["dan"])
+        #expect(replies.next == nil)
     }
 }
 

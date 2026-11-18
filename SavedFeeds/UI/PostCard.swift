@@ -3,6 +3,7 @@ import SwiftUI
 struct PostCard: View {
     let post: SavedPost
     @State private var expanded = false
+    @State private var showingComments = false
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -33,7 +34,11 @@ struct PostCard: View {
         }
         .padding(14)
         .background(.background.secondary, in: .rect(cornerRadius: 12))
+        .sheet(isPresented: $showingComments) {
+            CommentsSheet(post: post)
+        }
         .contextMenu {
+            Button("Show Comments") { showingComments = true }
             Button("Open in Browser") { openURL(post.permalink) }
             if let link = post.link {
                 Button("Open Link") { openURL(link) }
@@ -64,9 +69,11 @@ struct PostCard: View {
             if let score = post.score {
                 Label(score.formatted(.number.notation(.compactName)), systemImage: post.service == .reddit ? "arrow.up" : "heart")
             }
-            if let comments = post.comments {
-                Label(comments.formatted(.number.notation(.compactName)), systemImage: "bubble.right")
+            Button { showingComments = true } label: {
+                Label(post.comments?.formatted(.number.notation(.compactName)) ?? "Comments", systemImage: "bubble.right")
             }
+            .buttonStyle(.borderless)
+            .help("Show comments")
             Spacer()
             ShareLink(item: post.permalink) {
                 Image(systemName: "square.and.arrow.up")

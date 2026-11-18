@@ -30,6 +30,8 @@ struct SavedPost: Identifiable, Hashable, Codable {
     let score: Int?
     let comments: Int?
     var isComment = false
+    /// Instagram's numeric media ID, for loading comments.
+    var mediaID: String? = nil
 }
 
 struct Media: Hashable, Codable {

@@ -24,7 +24,7 @@ final class RedditSource: FeedSource {
     }
 
     /// Any reddit.com URL, fetched from www.reddit.com (feed links work there too).
-    private static func get(_ url: URL) async throws -> Data {
+    static func get(_ url: URL) async throws -> Data {
         let query = url.query(percentEncoded: true).map { "?" + $0 } ?? ""
         let response = try await SitePage.reddit.fetch(url.path(percentEncoded: true) + query)
         switch response.status {
