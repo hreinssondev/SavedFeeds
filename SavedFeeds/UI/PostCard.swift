@@ -3,8 +3,8 @@ import SwiftUI
 struct PostCard: View {
     let post: SavedPost
     @State private var expanded = false
-    @State private var showingComments = false
     @Environment(\.openURL) private var openURL
+    @Environment(AppModel.self) private var app
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -31,14 +31,16 @@ struct PostCard: View {
                 }
             }
             footer
+            if commentsOpen {
+                Divider()
+                CommentsSection(model: app.comments(for: post), onHide: toggleComments)
+                    .transition(.opacity)
+            }
         }
         .padding(14)
         .background(.background.secondary, in: .rect(cornerRadius: 12))
-        .sheet(isPresented: $showingComments) {
-            CommentsSheet(post: post)
-        }
         .contextMenu {
-            Button("Show Comments") { showingComments = true }
+            Button(commentsOpen ? "Hide Comments" : "Show Comments", action: toggleComments)
             Button("Open in Browser") { openURL(post.permalink) }
             if let link = post.link {
                 Button("Open Link") { openURL(link) }
@@ -69,11 +71,11 @@ struct PostCard: View {
             if let score = post.score {
                 Label(score.formatted(.number.notation(.compactName)), systemImage: post.service == .reddit ? "arrow.up" : "heart")
             }
-            Button { showingComments = true } label: {
-                Label(post.comments?.formatted(.number.notation(.compactName)) ?? "Comments", systemImage: "bubble.right")
+            Button(action: toggleComments) {
+                Label(post.comments?.formatted(.number.notation(.compactName)) ?? "Comments", systemImage: commentsOpen ? "bubble.right.fill" : "bubble.right")
             }
             .buttonStyle(.borderless)
-            .help("Show comments")
+            .help(commentsOpen ? "Hide comments (Esc hides all)" : "Show comments")
             Spacer()
             ShareLink(item: post.permalink) {
                 Image(systemName: "square.and.arrow.up")
@@ -86,6 +88,12 @@ struct PostCard: View {
         }
         .font(.subheadline)
         .foregroundStyle(.secondary)
+    }
+
+    private var commentsOpen: Bool { app.openComments.contains(post.id) }
+
+    private func toggleComments() {
+        withAnimation(.snappy(duration: 0.25)) { app.toggleComments(for: post) }
     }
 
     private func copy(_ url: URL) {

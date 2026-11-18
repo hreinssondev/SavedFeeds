@@ -3,6 +3,8 @@ import SwiftUI
 struct FeedColumn: View {
     let feed: FeedModel
     @Environment(AppModel.self) private var app
+    /// The post at the top of the column.
+    @State private var topPostID: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -65,21 +67,32 @@ struct FeedColumn: View {
                 }
             }
         } else {
-            ScrollView {
-                LazyVStack(spacing: 16) {
-                    ForEach(feed.posts) { post in
-                        PostCard(post: post)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(feed.posts) { post in
+                            PostCard(post: post)
+                                .id(post.id)
+                        }
+                        if feed.canLoadMore {
+                            ProgressView()
+                                .padding()
+                                // Runs when the end scrolls into view, and again after each page while it stays visible.
+                                .task(id: feed.posts.count) { await feed.loadMore() }
+                        }
                     }
-                    if feed.canLoadMore {
-                        ProgressView()
-                            .padding()
-                            // Runs when the end scrolls into view, and again after each page while it stays visible.
-                            .task(id: feed.posts.count) { await feed.loadMore() }
+                    .scrollTargetLayout()
+                    .frame(maxWidth: 640)
+                    .padding(20)
+                    .frame(maxWidth: .infinity)
+                }
+                .scrollPosition(id: $topPostID, anchor: .top)
+                // Closing the comments you were scrolled into would leave you further down the feed; go back to their post.
+                .onChange(of: app.openComments) { old, new in
+                    if let id = topPostID, old.subtracting(new).contains(id) {
+                        proxy.scrollTo(id, anchor: .top)
                     }
                 }
-                .frame(maxWidth: 640)
-                .padding(20)
-                .frame(maxWidth: .infinity)
             }
         }
     }

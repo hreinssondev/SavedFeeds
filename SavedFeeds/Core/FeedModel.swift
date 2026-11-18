@@ -69,6 +69,25 @@ final class AppModel {
     let instagram = FeedModel(source: InstagramSource())
     /// Shows the sign-in sheet in the main window.
     var signingIn: Service?
+    /// Posts whose comments are open below them.
+    private(set) var openComments: Set<String> = []
+    /// Loaded comments, kept so reopening is instant.
+    @ObservationIgnored private var commentModels: [String: CommentsModel] = [:]
+
+    func comments(for post: SavedPost) -> CommentsModel {
+        if let model = commentModels[post.id] { return model }
+        let model = CommentsModel(post: post)
+        commentModels[post.id] = model
+        return model
+    }
+
+    func toggleComments(for post: SavedPost) {
+        if openComments.remove(post.id) == nil { openComments.insert(post.id) }
+    }
+
+    func closeAllComments() {
+        openComments.removeAll()
+    }
 
     func feed(for service: Service) -> FeedModel {
         switch service {

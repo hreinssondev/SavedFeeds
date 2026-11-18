@@ -1,86 +1,81 @@
 import SwiftUI
 
-struct CommentsSheet: View {
-    @State private var model: CommentsModel
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
-
-    init(post: SavedPost) {
-        _model = State(initialValue: CommentsModel(post: post))
-    }
+/// A post's comments, opened below it in the feed.
+struct CommentsSection: View {
+    let model: CommentsModel
+    let onHide: () -> Void
+    /// Top-level comments shown; long threads reveal more at a time.
+    @State private var shown = 20
 
     private var post: SavedPost { model.post }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(post.title ?? post.author)
-                        .font(.headline)
-                        .lineLimit(1)
-                    Text((model.total ?? post.comments).map { "\($0.formatted()) comments" } ?? "Comments")
-                        .font(.caption)
+        VStack(alignment: .leading, spacing: 14) {
+            if model.comments.isEmpty {
+                if let problem = model.problem {
+                    HStack {
+                        Text(problem.localizedDescription)
+                            .foregroundStyle(.secondary)
+                        Button("Try Again") { Task { await model.load() } }
+                            .buttonStyle(.link)
+                    }
+                } else if model.isLoading {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text("Loading comments…")
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Text("No comments yet.")
                         .foregroundStyle(.secondary)
                 }
-                Spacer()
-                if model.isLoading {
-                    ProgressView()
-                        .controlSize(.small)
+            } else {
+                ForEach(Array(model.comments.prefix(shown))) { comment in
+                    CommentRow(
+                        comment: comment, service: post.service, permalink: post.permalink,
+                        loadReplies: post.service == .instagram ? { await model.loadReplies(to: comment.id) } : nil
+                    )
                 }
-                Button("Open on \(post.service.name)") { openURL(post.permalink) }
-                Button("Done") { dismiss() }
-                    .keyboardShortcut(.cancelAction)
+                more
+                if let problem = model.problem {
+                    Text(problem.localizedDescription)
+                        .foregroundStyle(.secondary)
+                }
             }
-            .padding(12)
-            Divider()
-            content
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            HStack {
+                Button("Hide Comments", action: onHide)
+                    .buttonStyle(.link)
+                Spacer()
+                Link("Open on \(post.service.name)", destination: post.permalink)
+            }
         }
-        .frame(width: 600, height: 760)
+        .font(.callout)
         .task { await model.load() }
     }
 
     @ViewBuilder
-    private var content: some View {
-        if model.comments.isEmpty {
-            if let problem = model.problem {
-                ContentUnavailableView {
-                    Label("Couldn't Load Comments", systemImage: "exclamationmark.triangle")
-                } description: {
-                    Text(problem.localizedDescription)
-                } actions: {
-                    Button("Try Again") { Task { await model.load() } }
-                }
-            } else if model.isLoading {
-                ProgressView()
-            } else {
-                ContentUnavailableView("No Comments", systemImage: "bubble.left.and.bubble.right")
-            }
-        } else {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    ForEach(model.comments) { comment in
-                        CommentRow(
-                            comment: comment, service: post.service, permalink: post.permalink,
-                            loadReplies: post.service == .instagram ? { await model.loadReplies(to: comment.id) } : nil
-                        )
-                        Divider()
-                    }
-                    if model.canLoadMore {
-                        Button("Load More Comments") { Task { await model.loadMore() } }
-                            .disabled(model.isLoading)
-                    } else if model.more > 0 {
-                        Link("\(model.more) more comments on \(post.service.name)", destination: post.permalink)
-                            .font(.callout)
-                    }
-                    if let problem = model.problem {
-                        Text(problem.localizedDescription)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
+    private var more: some View {
+        if shown < model.comments.count {
+            Button("Show More Comments") { shown += 20 }
+                .buttonStyle(.link)
+        } else if model.canLoadMore {
+            HStack(spacing: 8) {
+                Button("Load More Comments") {
+                    Task {
+                        await model.loadMore()
+                        shown = model.comments.count
                     }
                 }
-                .padding(20)
+                .buttonStyle(.link)
+                .disabled(model.isLoading)
+                if model.isLoading {
+                    ProgressView()
+                        .controlSize(.mini)
+                }
             }
+        } else if model.more > 0 {
+            Link("\(model.more) more comments on \(post.service.name)", destination: post.permalink)
         }
     }
 }

@@ -13,6 +13,15 @@ struct RootView: View {
         }
         .frame(minWidth: 900, minHeight: 600)
         .toolbar {
+            if !app.openComments.isEmpty {
+                ToolbarItem {
+                    Button { withAnimation(.snappy(duration: 0.25)) { app.closeAllComments() } } label: {
+                        Label("Close Comments", systemImage: "bubble.left.and.bubble.right.fill")
+                    }
+                    .keyboardShortcut(.escape, modifiers: [])
+                    .help("Close all open comments (Esc)")
+                }
+            }
             ToolbarItem {
                 Button { Task { await app.refreshAll() } } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
