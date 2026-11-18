@@ -9,6 +9,17 @@
     {
       "layers" : [
         {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:1.00000,0.50000,0.40000,1.00000",
+                  "display-p3:0.98000,0.25000,0.23000,1.00000"
+                ]
+              }
+            }
+          ],
           "glass" : true,
           "image-name" : "Bookmark.svg",
           "name" : "Bookmark"
