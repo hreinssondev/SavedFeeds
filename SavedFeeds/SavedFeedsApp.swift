@@ -16,6 +16,9 @@ struct SavedFeedsApp: App {
                 .environment(app)
         }
         // Opens filling the screen.
+        // No title bar or toolbar: the feeds' header bars are the top of the window.
+        .windowStyle(.hiddenTitleBar)
+        .windowBackgroundDragBehavior(.enabled)
         .defaultWindowPlacement { _, context in
             WindowPlacement(size: context.defaultDisplay.visibleRect.size)
         }

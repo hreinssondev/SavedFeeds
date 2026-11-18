@@ -2,6 +2,9 @@ import SwiftUI
 
 struct FeedColumn: View {
     let feed: FeedModel
+    /// Tall enough to center on the window controls, since the header bars stand in for the title bar.
+    let headerHeight: CGFloat
+    @State private var hoveringHeader = false
     @Environment(AppModel.self) private var app
     /// The post at the top of the column.
     @State private var topPostID: String?
@@ -20,8 +23,9 @@ struct FeedColumn: View {
         }
     }
 
+    /// The service centered in the column's bar; refreshing shows on hover (⌘R refreshes both).
     private var header: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             ServiceBadge(service: feed.service)
             Text(feed.service.name)
                 .font(.headline)
@@ -30,20 +34,28 @@ struct FeedColumn: View {
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
             }
-            Spacer()
-            if feed.isLoading {
-                ProgressView()
-                    .controlSize(.small)
-            }
-            Button { Task { await feed.refresh() } } label: {
-                Image(systemName: "arrow.clockwise")
-            }
-            .buttonStyle(.borderless)
-            .help("Refresh")
-            .disabled(feed.isLoading)
         }
-        .padding(.horizontal, 16)
-        .frame(height: 40)
+        .frame(maxWidth: .infinity)
+        .overlay(alignment: .trailing) {
+            Group {
+                if feed.isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                } else if hoveringHeader {
+                    Button { Task { await feed.refresh() } } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Refresh \(feed.service.name) (⌘R refreshes both)")
+                }
+            }
+            .padding(.trailing, 12)
+        }
+        .frame(height: headerHeight)
+        .contentShape(.rect)
+        .onHover { hoveringHeader = $0 }
+        .gesture(WindowDragGesture())
+        .allowsWindowActivationEvents(true)
     }
 
     @ViewBuilder
@@ -159,9 +171,9 @@ struct ServiceBadge: View {
 
     var body: some View {
         Image(systemName: service.symbol)
-            .font(.system(size: 11, weight: .bold))
+            .font(.system(size: 10, weight: .bold))
             .foregroundStyle(.white)
-            .frame(width: 22, height: 22)
+            .frame(width: 18, height: 18)
             .background(service.tint, in: .circle)
     }
 }
