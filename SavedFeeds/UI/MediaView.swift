@@ -90,6 +90,7 @@ struct RemoteImage: View {
 struct VideoTile: View {
     let media: Media
     let loops: Bool
+    @Environment(\.opensOnClick) private var opensOnClick
     @State private var player: AVPlayer?
     @State private var looper: AVPlayerLooper?
 
@@ -98,21 +99,28 @@ struct VideoTile: View {
             if let player {
                 PlayerView(player: player, showsControls: !loops)
             } else {
-                Button(action: play) {
-                    ZStack {
-                        RemoteImage(url: media.image)
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: 56))
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.white, .black.opacity(0.5))
-                    }
-                    .contentShape(.rect)
+                if opensOnClick {
+                    // Two abreast, a click on the poster opens the post, where it plays full size.
+                    poster
+                } else {
+                    Button(action: play) { poster }
+                        .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .onAppear { if loops { play() } }
         .onDisappear(perform: stop)
+    }
+
+    private var poster: some View {
+        ZStack {
+            RemoteImage(url: media.image)
+            Image(systemName: "play.circle.fill")
+                .font(.system(size: 56))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, .black.opacity(0.5))
+        }
+        .contentShape(.rect)
     }
 
     private func play() {

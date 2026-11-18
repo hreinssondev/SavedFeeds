@@ -17,13 +17,26 @@ struct RootView: View {
         .ignoresSafeArea(.container, edges: .top)
         .background(WindowControlsProbe { controlsCenterY = $0 })
         .background {
-            // Esc closes every open comment section (disabled otherwise, so Esc keeps its other uses).
-            Button("Close Comments") { withAnimation(.snappy(duration: 0.25)) { app.closeAllComments() } }
-                .keyboardShortcut(.escape, modifiers: [])
-                .disabled(app.openComments.isEmpty)
-                .opacity(0)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
+            // Esc closes an opened post, or else every open comment section (disabled when there's
+            // neither, so Esc keeps its other uses).
+            Button("Close") {
+                withAnimation(.snappy(duration: 0.25)) {
+                    if app.openedPost != nil { app.closeOpenedPost() } else { app.closeAllComments() }
+                }
+            }
+            .keyboardShortcut(.escape, modifiers: [])
+            .disabled(app.openedPost == nil && app.openComments.isEmpty)
+            .opacity(0)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
+        .overlay {
+            if let post = app.openedPost {
+                OpenedPostOverlay(post: post) {
+                    withAnimation(.snappy(duration: 0.2)) { app.closeOpenedPost() }
+                }
+                .transition(.opacity)
+            }
         }
         .frame(minWidth: 900, minHeight: 600)
         .task {

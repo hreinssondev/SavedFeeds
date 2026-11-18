@@ -123,6 +123,9 @@ struct FeedColumn: View {
         LazyVStack(spacing: Self.spacing) {
             ForEach(posts) { post in
                 PostCard(post: post)
+                    .modifier(OpensOnClick(enabled: isTwoUp) {
+                        withAnimation(.snappy(duration: 0.2)) { app.open(post) }
+                    })
                     .id(post.id)
                     .onGeometryChange(for: Bool.self) { proxy in
                         let frame = proxy.frame(in: .scrollView)

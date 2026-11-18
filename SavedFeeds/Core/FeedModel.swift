@@ -89,6 +89,21 @@ final class AppModel {
         openComments.removeAll()
     }
 
+    /// A post opened full size from the two-abreast feed.
+    private(set) var openedPost: SavedPost?
+    @ObservationIgnored private var openedPostHadComments = false
+
+    func open(_ post: SavedPost) {
+        openedPostHadComments = openComments.contains(post.id)
+        openedPost = post
+    }
+
+    /// Comments opened while the post was open close with it.
+    func closeOpenedPost() {
+        if let post = openedPost, !openedPostHadComments { openComments.remove(post.id) }
+        openedPost = nil
+    }
+
     func feed(for service: Service) -> FeedModel {
         switch service {
         case .reddit: reddit
