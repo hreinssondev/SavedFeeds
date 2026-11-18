@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- A bookmark ribbon: rounded top corners, softened tips and notch. -->
+  <path transform="translate(512 512) scale(1.07) translate(-512 -512)" fill="#FFFFFF" d="
+    M 322 330
+    Q 322 262 390 262
+    L 634 262
+    Q 702 262 702 330
+    L 702 728
+    Q 702 764 673 745
+    L 538 657
+    Q 512 640 486 657
+    L 351 745
+    Q 322 764 322 728
+    Z"/>
+</svg>
