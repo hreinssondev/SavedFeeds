@@ -7,6 +7,7 @@ struct FeedColumn: View {
     @State private var hoveringHeader = false
     @Environment(AppModel.self) private var app
     @State private var topEdge = TopEdge()
+    @State private var columnWidth = 0.0
     @AppStorage(FeedZoom.key) private var zoom = 1.0
 
     var body: some View {
@@ -81,29 +82,24 @@ struct FeedColumn: View {
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(feed.posts) { post in
-                            PostCard(post: post)
-                                .id(post.id)
-                                .onGeometryChange(for: Bool.self) { proxy in
-                                    let frame = proxy.frame(in: .scrollView)
-                                    return frame.minY < 0 && frame.maxY > 0
-                                } action: { straddles in
-                                    if straddles { topEdge.posts.insert(post.id) } else { topEdge.posts.remove(post.id) }
-                                }
-                        }
-                        if feed.canLoadMore {
-                            ProgressView()
-                                .padding()
-                                // Runs when the end scrolls into view, and again after each page while it stays visible.
-                                .task(id: feed.posts.count) { await feed.loadMore() }
+                    Group {
+                        if isTwoUp {
+                            // Two independent stacks, so a short post doesn't leave a gap beside a tall one.
+                            HStack(alignment: .top, spacing: Self.spacing) {
+                                posts(feed.posts.enumerated().filter { $0.offset.isMultiple(of: 2) }.map(\.element))
+                                posts(feed.posts.enumerated().filter { !$0.offset.isMultiple(of: 2) }.map(\.element))
+                            }
+                            .frame(maxWidth: FeedZoom.width * zoom * 2 + Self.spacing)
+                        } else {
+                            posts(feed.posts)
+                                .frame(maxWidth: FeedZoom.width * zoom)
                         }
                     }
                     .zoomedFont(.body)
-                    .frame(maxWidth: FeedZoom.width * zoom)
-                    .padding(20)
+                    .padding(Self.margin)
                     .frame(maxWidth: .infinity)
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { columnWidth = $0 }
                 .environment(\.feedZoom, zoom)
                 // Closing the comments you were scrolled into would leave you further down the feed; go back to their post.
                 .onChange(of: app.openComments) { old, new in
@@ -111,6 +107,36 @@ struct FeedColumn: View {
                         proxy.scrollTo(id, anchor: .top)
                     }
                 }
+            }
+        }
+    }
+
+    private static let spacing = 16.0
+    private static let margin = 20.0
+
+    /// Zoomed out to 80 % or less, posts go two abreast when each still gets 300 pt.
+    private var isTwoUp: Bool {
+        zoom <= 0.8 && (columnWidth - Self.margin * 2 - Self.spacing) / 2 >= 300
+    }
+
+    private func posts(_ posts: [SavedPost]) -> some View {
+        LazyVStack(spacing: Self.spacing) {
+            ForEach(posts) { post in
+                PostCard(post: post)
+                    .id(post.id)
+                    .onGeometryChange(for: Bool.self) { proxy in
+                        let frame = proxy.frame(in: .scrollView)
+                        return frame.minY < 0 && frame.maxY > 0
+                    } action: { straddles in
+                        if straddles { topEdge.posts.insert(post.id) } else { topEdge.posts.remove(post.id) }
+                    }
+            }
+            if feed.canLoadMore {
+                ProgressView()
+                    .padding()
+                    // Runs when the end scrolls into view, and again after each page while it stays visible.
+                    // Two abreast, each stack has one; whichever shows first loads the page.
+                    .task(id: feed.posts.count) { await feed.loadMore() }
             }
         }
     }
