@@ -138,7 +138,7 @@ private struct PlayerView: NSViewRepresentable {
     let showsControls: Bool
 
     func makeNSView(context: Context) -> AVPlayerView {
-        let view = AVPlayerView()
+        let view = FeedPlayerView()
         view.player = player
         view.controlsStyle = showsControls ? .floating : .none
         view.showsFullScreenToggleButton = true
@@ -148,5 +148,22 @@ private struct PlayerView: NSViewRepresentable {
 
     func updateNSView(_ view: AVPlayerView, context: Context) {
         if view.player !== player { view.player = player }
+    }
+}
+
+/// Leaves vertical scrolling to the feed; AVPlayerView would scrub the video with it. Horizontal swipes still scrub.
+private final class FeedPlayerView: AVPlayerView {
+    private var scrollsFeed = true
+
+    override func scrollWheel(with event: NSEvent) {
+        // Decide once per gesture (momentum events carry no phase), or per notch for a mouse wheel.
+        if event.phase == .began || event.phase == .mayBegin || (event.phase == [] && event.momentumPhase == []) {
+            scrollsFeed = abs(event.scrollingDeltaY) >= abs(event.scrollingDeltaX)
+        }
+        if scrollsFeed {
+            (enclosingScrollView ?? nextResponder)?.scrollWheel(with: event)
+        } else {
+            super.scrollWheel(with: event)
+        }
     }
 }
