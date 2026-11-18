@@ -1,33 +1,42 @@
 import Foundation
 
 /// Saved posts through the instagram.com web session. Unofficial: Instagram has no API for these,
-/// so this calls the endpoint instagram.com's own "Saved" page uses.
+/// so this calls the endpoint instagram.com's own "Saved" page uses, from inside instagram.com.
 struct InstagramSource: FeedSource {
     let service = Service.instagram
+    private static let path = "/api/v1/feed/saved/posts/"
 
     func page(after cursor: String?) async throws -> FeedPage {
         guard await service.isSignedIn() else { throw FeedError.notConnected }
-        var components = URLComponents(string: "https://www.instagram.com/api/v1/feed/saved/posts/")!
-        if let cursor { components.queryItems = [URLQueryItem(name: "max_id", value: cursor)] }
-        var headers = [
-            "X-IG-App-ID": "936619743392459", // instagram.com's web app
-            "X-Requested-With": "XMLHttpRequest",
-            "Referer": "https://www.instagram.com/",
-            "Accept": "application/json",
-        ]
-        headers["X-CSRFToken"] = await WebSession.cookie("csrftoken", for: "instagram.com")
-        let (data, finalURL) = try await WebSession.data(from: components.url!, cookiesFor: "instagram.com", headers: headers)
-        if finalURL?.path().contains("/accounts/login") == true { throw FeedError.signedOut }
-        return try InstagramParser.page(from: data)
+        var path = Self.path
+        if let cursor, let encoded = cursor.addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
+            path += "?max_id=" + encoded
+        }
+        let response = try await SitePage.instagram.fetch(path, instagram: true)
+        if response.path.hasPrefix("/accounts/login") || response.status == 401 || response.status == 403 {
+            throw FeedError.signedOut
+        }
+        guard (200..<300).contains(response.status) else { throw FeedError.http(response.status) }
+        // Bounced somewhere else (the home page): Instagram didn't take the session.
+        guard response.path == Self.path else { throw FeedError.signedOut }
+        return try InstagramParser.page(from: response.body)
     }
 }
 
 /// Reads `/api/v1/feed/saved/posts/`.
 enum InstagramParser {
     static func page(from data: Data) throws -> FeedPage {
-        guard let response = try? JSONDecoder().decode(Response.self, from: data) else { throw FeedError.unreadable }
+        let response: Response
+        do {
+            response = try JSONDecoder().decode(Response.self, from: data)
+        } catch {
+            log.error("Instagram unreadable: \(error, privacy: .public) body: \(String(decoding: data.prefix(400), as: UTF8.self), privacy: .public)")
+            throw FeedError.unreadable
+        }
         if response.message == "login_required" { throw FeedError.signedOut }
-        guard let items = response.items else { throw FeedError.unreadable }
+        guard let items = response.items else {
+            throw response.message.map { FeedError.failed("Instagram said: \($0)") } ?? .unreadable
+        }
         return FeedPage(
             posts: items.compactMap { $0.media.flatMap(post) },
             next: response.more_available == true ? response.next_max_id?.value : nil

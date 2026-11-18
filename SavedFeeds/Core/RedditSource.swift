@@ -6,12 +6,13 @@ final class RedditSource: FeedSource {
     private var username: (session: String, name: String)?
 
     func page(after cursor: String?) async throws -> FeedPage {
-        if let feed = Credentials.redditFeedURL.flatMap(URL.init(string:)) {
+        if let feed = Self.feedLink(from: Credentials.redditFeedURL) {
+            log.info("Reddit feed link: \(Self.redacted(feed), privacy: .public)")
             do {
-                let (data, _) = try await WebSession.data(from: Self.pageURL(feed, after: cursor))
-                return try RedditParser.page(from: data)
+                return try RedditParser.page(from: try await Self.get(Self.pageURL(feed, after: cursor)))
             } catch FeedError.signedOut {
-                throw FeedError.badFeedLink
+                guard await Service.reddit.isSignedIn() else { throw FeedError.badFeedLink }
+                log.info("Reddit rejected the feed link; using the reddit.com session")
             }
         }
         guard let session = await WebSession.cookie(Service.reddit.sessionCookie, for: "reddit.com") else {
@@ -19,8 +20,18 @@ final class RedditSource: FeedSource {
         }
         let name = try await currentUsername(session: session)
         let saved = URL(string: "https://www.reddit.com/user/\(name)/saved.json")!
-        let (data, _) = try await WebSession.data(from: Self.pageURL(saved, after: cursor), cookiesFor: "reddit.com")
-        return try RedditParser.page(from: data)
+        return try RedditParser.page(from: try await Self.get(Self.pageURL(saved, after: cursor)))
+    }
+
+    /// Any reddit.com URL, fetched from www.reddit.com (feed links work there too).
+    private static func get(_ url: URL) async throws -> Data {
+        let query = url.query(percentEncoded: true).map { "?" + $0 } ?? ""
+        let response = try await SitePage.reddit.fetch(url.path(percentEncoded: true) + query)
+        switch response.status {
+        case 200..<300: return response.body
+        case 401, 403: throw FeedError.signedOut
+        default: throw FeedError.http(response.status)
+        }
     }
 
     private func currentUsername(session: String) async throws -> String {
@@ -29,10 +40,28 @@ final class RedditSource: FeedSource {
             struct Account: Decodable { let name: String }
             let data: Account?
         }
-        let (data, _) = try await WebSession.data(from: URL(string: "https://www.reddit.com/api/me.json")!, cookiesFor: "reddit.com")
+        let data = try await Self.get(URL(string: "https://www.reddit.com/api/me.json")!)
         guard let name = (try? JSONDecoder().decode(Me.self, from: data))?.data?.name else { throw FeedError.signedOut }
         username = (session, name)
         return name
+    }
+
+    /// The pasted feed link, if it has its token (`?feed=…`). Without one it can't work, so the session is used.
+    static func feedLink(from string: String?) -> URL? {
+        guard let string, let url = URL(string: string.trimmingCharacters(in: .whitespacesAndNewlines)),
+              url.host()?.hasSuffix("reddit.com") == true,
+              let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems,
+              items.contains(where: { $0.name == "feed" && $0.value?.isEmpty == false })
+        else { return nil }
+        return url
+    }
+
+    /// The link's shape with its values hidden, for the log.
+    static func redacted(_ url: URL) -> String {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return "unparseable" }
+        components.queryItems = components.queryItems?.map { URLQueryItem(name: $0.name, value: $0.value.map { "<\($0.count)>" }) }
+        if let fragment = components.fragment { components.fragment = "<\(fragment.count)>" }
+        return components.string ?? "unparseable"
     }
 
     /// `base` with paging added. Takes the feed page's RSS link too.

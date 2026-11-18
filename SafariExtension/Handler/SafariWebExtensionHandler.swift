@@ -6,8 +6,8 @@ nonisolated final class SafariWebExtensionHandler: NSObject, NSExtensionRequestH
     func beginRequest(with context: NSExtensionContext) {
         let item = context.inputItems.first as? NSExtensionItem
         let message = item?.userInfo?[SFExtensionMessageKey] as? [String: Any]
-        if let sessions = message?["sessions"] as? [String: String], !sessions.isEmpty {
-            SharedSessions.hand(sessions)
+        if let handoff = message?["handoff"] as? String {
+            SharedSessions.hand(Data(handoff.utf8))
         }
         context.completeRequest(returningItems: [], completionHandler: nil)
     }

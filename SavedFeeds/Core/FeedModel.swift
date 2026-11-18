@@ -33,6 +33,7 @@ final class FeedModel {
             FeedCache.save(posts, for: service)
         } catch {
             problem = error as? FeedError ?? .failed(error.localizedDescription)
+            log.error("\(self.service.rawValue, privacy: .public): \(String(describing: self.problem), privacy: .public)")
             if problem == .notConnected { clear() }
         }
     }
@@ -50,6 +51,7 @@ final class FeedModel {
             FeedCache.save(posts, for: service)
         } catch {
             problem = error as? FeedError ?? .failed(error.localizedDescription)
+            log.error("\(self.service.rawValue, privacy: .public): \(String(describing: self.problem), privacy: .public)")
         }
     }
 
@@ -81,15 +83,22 @@ final class AppModel {
         _ = await (reddit, instagram)
     }
 
-    /// Adopts sign-ins the Safari extension handed over; returns the services whose session changed.
+    /// Adopts sign-ins the Safari extension handed over; returns the services to reload.
     @discardableResult
     func importSafariSessions() async -> [Service] {
+        guard let handoff = SharedSessions.take() else { return [] }
+        if let userAgent = handoff.userAgent { WebSession.userAgent = userAgent }
         var changed: [Service] = []
-        for (key, value) in SharedSessions.take() {
-            guard let service = Service(rawValue: key),
-                  await WebSession.cookie(service.sessionCookie, for: service.cookieDomain) != value
-            else { continue }
-            await service.useSession(value)
+        for (key, cookies) in handoff.cookies {
+            guard let service = Service(rawValue: key) else { continue }
+            let session = cookies.first { $0.name == service.sessionCookie }?.value
+            let isNew = await WebSession.cookie(service.sessionCookie, for: service.cookieDomain) != session
+            guard isNew || feed(for: service).problem != nil else { continue }
+            // Safari's whole set replaces ours: the session only counts alongside the visitor and device cookies it was made with.
+            await WebSession.clear(service.cookieDomain)
+            await WebSession.setCookies(cookies.compactMap(\.httpCookie))
+            SitePage.for(service).reload()
+            log.info("Safari handed over \(cookies.count) \(key, privacy: .public) cookies")
             changed.append(service)
         }
         return changed

@@ -26,8 +26,9 @@ Without the extension, you can paste the session cookie by hand (`reddit_session
 ## How it works
 
 - `Core/RedditSource.swift`: the private feed link, or `/user/<you>/saved.json` with the reddit.com session.
+- `Core/SitePage.swift`: both are fetched from a hidden tab on the site itself. Reddit blocks bare requests and Instagram bounces them, even with the session.
 - `Core/InstagramSource.swift`: `/api/v1/feed/saved/posts/`, the endpoint instagram.com's Saved page uses, with the web session.
-- Sign-ins run in a web view (`UI/SignInSheet.swift`) or come from Safari via the extension (`SafariExtension/`, `Core/SharedSessions.swift`, through an App Group). Feed requests reuse those cookies (`Core/WebSession.swift`).
+- Sign-ins run in a web view (`UI/SignInSheet.swift`) or come from Safari via the extension (`SafariExtension/`, `Core/SharedSessions.swift`, through an App Group). The hidden tabs share those cookies (`Core/WebSession.swift`).
 - The feed link is kept in the Keychain. The last loaded posts are cached in Application Support.
 
 ## Caveats

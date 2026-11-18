@@ -48,6 +48,13 @@ struct RedditParserTests {
         #expect(throws: FeedError.unreadable) { try RedditParser.page(from: Data("<html></html>".utf8)) }
     }
 
+    @Test func feedLinkNeedsItsToken() {
+        #expect(RedditSource.feedLink(from: "https://www.reddit.com/user/me/feed=") == nil)
+        #expect(RedditSource.feedLink(from: "https://www.reddit.com/user/me/saved.json?feed=&user=me") == nil)
+        #expect(RedditSource.feedLink(from: "https://example.com/saved.json?feed=abc") == nil)
+        #expect(RedditSource.feedLink(from: " https://old.reddit.com/user/me/saved.json?feed=abc&user=me\n")?.host() == "old.reddit.com")
+    }
+
     @Test func feedLinkGetsPaging() throws {
         let rss = URL(string: "https://www.reddit.com/user/me/saved.rss?feed=abc&user=me&limit=25")!
         let url = RedditSource.pageURL(rss, after: "t3_x")
@@ -98,6 +105,22 @@ struct InstagramParserTests {
         #expect(throws: FeedError.signedOut) {
             try InstagramParser.page(from: Data(#"{"message":"login_required","status":"fail"}"#.utf8))
         }
+    }
+}
+
+struct SafariHandoffTests {
+    @Test func cookiesKeepTheirAttributes() throws {
+        // HTTPCookie caps expiry at 400 days out, so stay inside that.
+        let expiry = (Date.now.timeIntervalSince1970 + 30 * 86_400).rounded()
+        let json = #"{"cookies":{"instagram":[{"name":"sessionid","value":"abc","domain":".instagram.com","path":"/","secure":true,"httpOnly":true,"expirationDate":\#(expiry)},{"name":"rur","value":"x","domain":"www.instagram.com","path":"/","secure":false,"httpOnly":false}]},"userAgent":"Safari"}"#
+        let handoff = try JSONDecoder().decode(SharedSessions.Handoff.self, from: Data(json.utf8))
+        #expect(handoff.userAgent == "Safari")
+        let cookies = try #require(handoff.cookies["instagram"]).compactMap(\.httpCookie)
+        #expect(cookies.count == 2)
+        #expect(cookies[0].name == "sessionid" && cookies[0].domain == ".instagram.com")
+        #expect(cookies[0].isSecure && cookies[0].isHTTPOnly)
+        #expect(abs((cookies[0].expiresDate?.timeIntervalSince1970 ?? 0) - expiry) < 1)
+        #expect(cookies[1].expiresDate == nil && !cookies[1].isSecure)
     }
 }
 

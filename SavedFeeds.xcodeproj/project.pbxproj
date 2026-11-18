@@ -25,6 +25,7 @@
 		7FD699ABD9FE0C24A215EBCB /* FeedColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CCA10A27DF842B24F278CA /* FeedColumn.swift */; };
 		8296F938B14EF2600E7676A8 /* SavedFeedsSafari.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FDD79D13EB4E3A90CF716137 /* SavedFeedsSafari.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9FB00A2040BBA3EE08EBB694 /* SharedSessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC564EF4827885057BA7DBC /* SharedSessions.swift */; };
+		A8B9256C9337412071CEB867 /* SitePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B852A05937A3ACF37A633E61 /* SitePage.swift */; };
 		B50AB68E34C4FED6BC84774B /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 4E69215EBE1F894BF197A1DC /* background.js */; };
 		BAFF1740D86B8C073A04B9A2 /* SignInSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465E204B340BD0FA781DBBF7 /* SignInSheet.swift */; };
 		C5C83F2C95091CC6CD5680B5 /* SharedSessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC564EF4827885057BA7DBC /* SharedSessions.swift */; };
@@ -83,6 +84,7 @@
 		ABC564EF4827885057BA7DBC /* SharedSessions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSessions.swift; sourceTree = "<group>"; };
 		AFE90DB26C55D5C32DD8738A /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		B2CCA10A27DF842B24F278CA /* FeedColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedColumn.swift; sourceTree = "<group>"; };
+		B852A05937A3ACF37A633E61 /* SitePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SitePage.swift; sourceTree = "<group>"; };
 		CD78569229322CDF7458612A /* SavedFeedsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SavedFeedsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7937699F8E7851BBB252780 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DBC186FC66B249C525EA4351 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				95DDFCF92718007FF6FE99ED /* RedditSource.swift */,
 				6D221B4E0EE419963BD4DE7C /* SavedPost.swift */,
 				ABC564EF4827885057BA7DBC /* SharedSessions.swift */,
+				B852A05937A3ACF37A633E61 /* SitePage.swift */,
 				E733031A24D7DC61F8872D1F /* WebSession.swift */,
 			);
 			path = Core;
@@ -335,6 +338,7 @@
 				02AD1DDDB40630789F761679 /* SettingsView.swift in Sources */,
 				9FB00A2040BBA3EE08EBB694 /* SharedSessions.swift in Sources */,
 				BAFF1740D86B8C073A04B9A2 /* SignInSheet.swift in Sources */,
+				A8B9256C9337412071CEB867 /* SitePage.swift in Sources */,
 				18C21C88B1B582F86FF081BF /* WebSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

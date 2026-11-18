@@ -30,8 +30,8 @@ struct SettingsView: View {
                         feedLinkChanged = true
                     }
                     .onSubmit(applyFeedLink)
-                if !feedLink.isEmpty, !feedLink.contains("feed=") {
-                    Text("This doesn't look like a private feed link; it should contain “feed=”.")
+                if !feedLink.isEmpty, RedditSource.feedLink(from: feedLink) == nil {
+                    Text("This link is missing its feed token (“…saved.json?feed=…&user=…”), so the reddit.com sign-in is used instead. Copy the whole JSON link from the feeds page.")
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
