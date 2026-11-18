@@ -29,6 +29,8 @@ struct RedditParserTests {
 
         let text = page.posts[3]
         #expect(text.text == "How do I **do** this?")
+        #expect(text.flair == "Help")
+        #expect(image.flair == nil)
         #expect(text.media.isEmpty)
         #expect(text.link == nil)
 
@@ -83,6 +85,8 @@ struct InstagramParserTests {
 
         let photo = page.posts[0]
         #expect(photo.mediaID == "3141")
+        #expect(photo.avatar?.absoluteString == "https://scontent.cdninstagram.com/photog.jpg")
+        #expect(page.posts[1].avatar == nil)
         #expect(page.posts[1].mediaID == "3142")
         #expect(photo.author == "photog")
         #expect(photo.text == "Sunset")
@@ -109,6 +113,19 @@ struct InstagramParserTests {
         #expect(throws: FeedError.signedOut) {
             try InstagramParser.page(from: Data(#"{"message":"login_required","status":"fail"}"#.utf8))
         }
+    }
+}
+
+struct SearchTests {
+    @Test func everyWordHasToBeSomewhereInThePost() throws {
+        let page = try RedditParser.page(from: Data(Fixtures.redditListing.utf8))
+        let question = try #require(page.posts.first { $0.id == "t3_self" })
+        #expect(question.matches(""))
+        #expect(question.matches("question"))
+        #expect(question.matches("r/swift do"))
+        #expect(question.matches("HELP dan"))
+        #expect(!question.matches("swift kotlin"))
+        #expect(page.posts.filter { $0.matches("cats") }.map(\.id) == ["t3_gal"])
     }
 }
 
@@ -194,7 +211,7 @@ enum Fixtures {
       {"kind":"t3","data":{"name":"t3_vid","permalink":"/r/videos/comments/vid/clip/","created_utc":1700000200,"author":"carol","subreddit_name_prefixed":"r/videos","title":"Clip","selftext":"","url":"https://v.redd.it/vid","is_self":false,"is_video":true,"post_hint":"hosted:video","score":5,"num_comments":0,
         "secure_media":{"reddit_video":{"hls_url":"https://v.redd.it/vid/HLSPlaylist.m3u8","fallback_url":"https://v.redd.it/vid/DASH_720.mp4","width":1280,"height":720,"is_gif":false}},
         "preview":{"images":[{"source":{"url":"https://preview.redd.it/vid.jpg","width":1280,"height":720}}]}}},
-      {"kind":"t3","data":{"name":"t3_self","permalink":"/r/swift/comments/self/question/","created_utc":1700000300,"author":"dan","subreddit_name_prefixed":"r/swift","title":"Question","selftext":"How do I **do** this?","url":"https://www.reddit.com/r/swift/comments/self/question/","is_self":true,"score":3,"num_comments":4}},
+      {"kind":"t3","data":{"name":"t3_self","permalink":"/r/swift/comments/self/question/","created_utc":1700000300,"author":"dan","subreddit_name_prefixed":"r/swift","title":"Question","selftext":"How do I **do** this?","url":"https://www.reddit.com/r/swift/comments/self/question/","is_self":true,"score":3,"num_comments":4,"link_flair_text":"Help"}},
       {"kind":"t3","data":{"name":"t3_link","permalink":"/r/news/comments/link/story/","created_utc":1700000350,"author":"erin","subreddit_name_prefixed":"r/news","title":"Story","selftext":"","url":"https://example.com/story","is_self":false,"post_hint":"link","score":99,"num_comments":12,
         "preview":{"images":[{"source":{"url":"https://external-preview.redd.it/story.jpg","width":1200,"height":630}}]}}},
       {"kind":"t3","data":{"name":"t3_xpost","permalink":"/r/gifs/comments/xpost/seen_elsewhere/","created_utc":1700000370,"author":"gina","subreddit_name_prefixed":"r/gifs","title":"Seen elsewhere","selftext":"","url":"/r/funny/comments/orig/","score":1,"num_comments":0,
@@ -209,7 +226,7 @@ enum Fixtures {
     {"items":[
       {"media":{"pk":3141,"id":"3141_99","code":"ABC","media_type":1,"taken_at":1700000000,"original_width":1080,"original_height":1350,
         "image_versions2":{"candidates":[{"url":"https://scontent.cdninstagram.com/small.jpg","width":320,"height":400},{"url":"https://scontent.cdninstagram.com/big.jpg","width":1080,"height":1350}]},
-        "caption":{"text":"Sunset"},"user":{"username":"photog","full_name":"P"},"like_count":120,"comment_count":4}},
+        "caption":{"text":"Sunset"},"user":{"username":"photog","full_name":"P","profile_pic_url":"https://scontent.cdninstagram.com/photog.jpg"},"like_count":120,"comment_count":4}},
       {"media":{"pk":"3142","code":"VID","media_type":2,"product_type":"clips","taken_at":1700000100,"original_width":720,"original_height":1280,
         "image_versions2":{"candidates":[{"url":"https://scontent.cdninstagram.com/poster.jpg","width":720,"height":1280}]},
         "video_versions":[{"type":101,"url":"https://scontent.cdninstagram.com/v.mp4","width":720,"height":1280}],

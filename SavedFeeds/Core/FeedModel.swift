@@ -16,11 +16,17 @@ final class FeedModel {
         self.source = source
         service = source.service
         posts = FeedCache.load(source.service)
+        #if DEBUG
+        if let demo = DemoData.posts(for: source.service) { posts = demo }
+        #endif
     }
 
     var canLoadMore: Bool { loadedFirstPage && next != nil }
 
     func refresh() async {
+        #if DEBUG
+        if DemoData.folder != nil { return }
+        #endif
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }

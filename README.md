@@ -14,7 +14,15 @@ Schemes: **SavedFeeds** (Mac) and **SavedFeedsiOS** (iPhone; pick your phone as 
 
 The iPhone app uses the Mac app's sign-ins: after a feed loads on the Mac, the Mac app saves that session to iCloud Keychain, and the iPhone app picks it up when it opens. Sessions are made on the Mac (Safari, passkeys) and copied to the phone; if one expires, sign in again on the Mac. The ⋯ menu has a sign-in on the phone itself as a backup (no passkeys there).
 
-The top bar switches between Reddit and Instagram (Instagram first); pull down to refresh.
+The navigation bar switches between Reddit and Instagram (Instagram first; tap the one you're on to go back to its top). On iPhone:
+
+- **Feeds**: whole posts (Instagram like the Instagram app, Reddit as cards), or from the ⋯ menu Instagram's 3-across grid and a compact Reddit list. Pull to refresh; older posts load as you scroll.
+- **Posts**: tap one to open it with its comments: threads collapse with a tap, Reddit comments sort (Best, Top, New…), Instagram replies load in place. Tapping a comment count opens the post at its comments.
+- **Pictures**: tap one in a post for full screen: swipe between them, pinch or double-tap to zoom, swipe down to close, share or Save Image.
+- **Search** (the field at the bottom) looks through titles, captions, authors, subreddits and flair, and can reach further back into older saved posts.
+- **Links**: Reddit and Instagram links open their apps; other links open in Safari inside the app. Long-press a post to preview it, open it, share or copy its link.
+
+For the iOS Simulator (no accounts there), a Debug build takes `-demoData <folder>` with `reddit.json` and `instagram.json` (the feed cache's format) to show sample posts; see `Core/DemoData.swift`.
 
 ## Connect
 

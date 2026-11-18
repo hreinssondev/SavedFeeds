@@ -24,6 +24,8 @@
 	<false/>
 	<key>KeychainGroup</key>
 	<string>$(AppIdentifierPrefix)com.hreinsson.SavedFeeds.sessions</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>SavedFeeds saves the pictures you choose to your photo library.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

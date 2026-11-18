@@ -112,6 +112,7 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         KeychainGroup: $(AppIdentifierPrefix)com.hreinsson.SavedFeeds.sessions
         ITSAppUsesNonExemptEncryption: false
+        NSPhotoLibraryAddUsageDescription: SavedFeeds saves the pictures you choose to your photo library.
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false

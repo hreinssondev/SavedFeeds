@@ -107,7 +107,8 @@ enum RedditParser {
             community: item.subreddit_name_prefixed, title: item.title,
             text: item.selftext?.isEmpty == false ? item.selftext : nil,
             permalink: permalink, link: origin.externalLink, media: media(of: origin), date: date,
-            score: item.score, comments: item.num_comments
+            score: item.score, comments: item.num_comments,
+            flair: item.link_flair_text?.isEmpty == false ? item.link_flair_text : nil
         )
     }
 
@@ -168,6 +169,7 @@ enum RedditParser {
         let url: String?
         let is_self: Bool?
         let post_hint: String?
+        let link_flair_text: String?
         let score: Int?
         let num_comments: Int?
         let preview: Preview?

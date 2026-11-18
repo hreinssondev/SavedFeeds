@@ -23,10 +23,30 @@ struct CommentPage {
     var total: Int?
 }
 
-/// One post's comments, as shown in the comments sheet.
+/// Reddit's comment orders.
+enum CommentSort: String, CaseIterable, Identifiable {
+    case best = "confidence", top, new, controversial, old, qa
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .best: "Best"
+        case .top: "Top"
+        case .new: "New"
+        case .controversial: "Controversial"
+        case .old: "Old"
+        case .qa: "Q&A"
+        }
+    }
+}
+
+/// One post's comments.
 @Observable
 final class CommentsModel {
     let post: SavedPost
+    /// Reddit only; Instagram has its own order.
+    private(set) var sort = CommentSort.best
     private(set) var comments: [Comment] = []
     private(set) var more = 0
     private(set) var total: Int?
@@ -48,6 +68,17 @@ final class CommentsModel {
     func loadMore() async {
         guard let next else { return }
         await fetch(after: next)
+    }
+
+    /// Fetches the comments again, replacing them when they arrive.
+    func reload() async {
+        await fetch(after: nil, replacing: true)
+    }
+
+    func sort(by sort: CommentSort) async {
+        guard sort != self.sort else { return }
+        self.sort = sort
+        await reload()
     }
 
     /// Instagram's replies to a top-level comment (it previews none).
@@ -78,14 +109,18 @@ final class CommentsModel {
         }
     }
 
-    private func fetch(after cursor: String?) async {
+    private func fetch(after cursor: String?, replacing: Bool = false) async {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         do {
-            let page = try await Self.page(for: post, after: cursor)
-            let known = Set(comments.map(\.id))
-            comments += page.comments.filter { !known.contains($0.id) }
+            let page = try await Self.page(for: post, after: cursor, sort: sort)
+            if replacing {
+                comments = page.comments
+            } else {
+                let known = Set(comments.map(\.id))
+                comments += page.comments.filter { !known.contains($0.id) }
+            }
             next = page.next
             more = page.more
             total = page.total ?? total
@@ -96,7 +131,12 @@ final class CommentsModel {
         }
     }
 
-    private static func page(for post: SavedPost, after cursor: String?) async throws -> CommentPage {
+    private static func page(for post: SavedPost, after cursor: String?, sort: CommentSort) async throws -> CommentPage {
+        #if DEBUG
+        if let data = DemoData.comments(for: post.service) {
+            return post.service == .reddit ? try RedditComments.page(from: data) : try InstagramComments.page(from: data)
+        }
+        #endif
         switch post.service {
         case .reddit:
             // The permalink's JSON: the post, then its comment tree (rooted at the comment for a saved comment).
@@ -104,7 +144,11 @@ final class CommentsModel {
             var path = components.path
             if path.hasSuffix("/") { path.removeLast() }
             components.path = path + ".json"
-            components.queryItems = [URLQueryItem(name: "raw_json", value: "1"), URLQueryItem(name: "limit", value: "200")]
+            components.queryItems = [
+                URLQueryItem(name: "raw_json", value: "1"),
+                URLQueryItem(name: "limit", value: "200"),
+                URLQueryItem(name: "sort", value: sort.rawValue),
+            ]
             return try RedditComments.page(from: try await RedditSource.get(components.url!))
         case .instagram:
             guard let mediaID = post.mediaID else {

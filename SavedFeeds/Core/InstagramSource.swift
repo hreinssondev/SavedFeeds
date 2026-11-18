@@ -51,7 +51,8 @@ enum InstagramParser {
             community: nil, title: nil, text: item.caption?.text,
             permalink: permalink, link: nil, media: parts.compactMap(\.media),
             date: Date(timeIntervalSince1970: item.taken_at ?? 0),
-            score: item.like_count, comments: item.comment_count, mediaID: item.pk?.value
+            score: item.like_count, comments: item.comment_count, mediaID: item.pk?.value,
+            avatar: item.user?.profile_pic_url.flatMap(URL.init(string:))
         )
     }
 
@@ -112,7 +113,10 @@ enum InstagramParser {
 
     struct Caption: Decodable { let text: String? }
 
-    struct User: Decodable { let username: String? }
+    struct User: Decodable {
+        let username: String?
+        let profile_pic_url: String?
+    }
 
     /// Instagram sends some IDs as strings and some as numbers.
     struct LooseString: Decodable {

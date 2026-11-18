@@ -80,7 +80,7 @@ struct CommentsSection: View {
     }
 }
 
-private struct CommentRow: View {
+struct CommentRow: View {
     let comment: Comment
     let service: Service
     let permalink: URL

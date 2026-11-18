@@ -32,6 +32,21 @@ struct SavedPost: Identifiable, Hashable, Codable {
     var isComment = false
     /// Instagram's numeric media ID, for loading comments.
     var mediaID: String? = nil
+    /// The author's profile picture (Instagram).
+    var avatar: URL? = nil
+    /// The post's flair (Reddit).
+    var flair: String? = nil
+
+    /// A picture standing for the post in grids and lists: its first picture or video poster.
+    var thumbnail: URL? { media.first?.image }
+
+    /// Whether every word of `query` is somewhere in the post's text, author, subreddit or flair.
+    func matches(_ query: String) -> Bool {
+        let words = query.split(whereSeparator: \.isWhitespace)
+        guard !words.isEmpty else { return true }
+        let haystack = [title, text, author, community, flair].compactMap(\.self).joined(separator: "\n")
+        return words.allSatisfy { haystack.localizedStandardContains($0) }
+    }
 }
 
 struct Media: Hashable, Codable {
