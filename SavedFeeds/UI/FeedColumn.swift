@@ -131,6 +131,9 @@ struct ConnectView: View {
                 SettingsLink { Text("Add Feed Link…") }
             }
             Button("Sign In…") { app.signingIn = service }
+            if service == .instagram {
+                SettingsLink { Text("Use Safari Session…") }
+            }
         }
     }
 }

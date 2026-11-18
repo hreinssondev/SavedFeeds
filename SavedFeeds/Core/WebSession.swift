@@ -28,6 +28,18 @@ enum WebSession {
             .value
     }
 
+    static func setCookie(_ name: String, _ value: String, for domain: String) async {
+        guard let cookie = HTTPCookie(properties: [
+            .name: name,
+            .value: value,
+            .domain: "." + domain,
+            .path: "/",
+            .secure: "TRUE",
+            .expires: Date.now.addingTimeInterval(365 * 24 * 3600),
+        ]) else { return }
+        await store.httpCookieStore.setCookie(cookie)
+    }
+
     static func clear(_ domain: String) async {
         let types = WKWebsiteDataStore.allWebsiteDataTypes()
         let records = await store.dataRecords(ofTypes: types)
@@ -90,5 +102,13 @@ extension Service {
 
     func signOut() async {
         await WebSession.clear(cookieDomain)
+    }
+
+    /// Adopts a session signed in elsewhere (Safari, with a passkey or Google), from its session cookie's value.
+    func useSession(_ pasted: String) async {
+        var value = pasted.trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: "\"")))
+        if value.hasPrefix(sessionCookie + "=") { value.removeFirst(sessionCookie.count + 1) }
+        guard !value.isEmpty else { return }
+        await WebSession.setCookie(sessionCookie, value, for: cookieDomain)
     }
 }

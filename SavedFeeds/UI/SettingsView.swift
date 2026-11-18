@@ -23,6 +23,7 @@ struct SettingsView: View {
                 }
                 Link("Get your feed link on old.reddit.com/prefs/feeds", destination: URL(string: "https://old.reddit.com/prefs/feeds/")!)
                 account(.reddit)
+                browserSession(.reddit)
             } header: {
                 Text("Reddit")
             } footer: {
@@ -33,6 +34,7 @@ struct SettingsView: View {
 
             Section {
                 account(.instagram)
+                browserSession(.instagram)
             } header: {
                 Text("Instagram")
             } footer: {
@@ -74,6 +76,13 @@ struct SettingsView: View {
         }
     }
 
+    private func browserSession(_ service: Service) -> some View {
+        BrowserSessionRow(service: service) {
+            await loadAccounts()
+            await app.feed(for: service).refresh()
+        }
+    }
+
     private func loadAccounts() async {
         var accounts = Set<Service>()
         for service in Service.allCases where await service.isSignedIn() {
@@ -86,5 +95,40 @@ struct SettingsView: View {
         guard feedLinkChanged else { return }
         feedLinkChanged = false
         Task { await app.reddit.refresh() }
+    }
+}
+
+/// For sign-ins the in-app web view can't do (passkeys; sometimes Google): copy the session cookie out of Safari.
+private struct BrowserSessionRow: View {
+    let service: Service
+    let onApplied: () async -> Void
+    @State private var value = ""
+
+    var body: some View {
+        DisclosureGroup("Use a session from Safari") {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("""
+                    1. Sign in on \(service.cookieDomain) in Safari, with a passkey or any other way.
+                    2. Turn on Safari › Settings › Advanced › Show features for web developers.
+                    3. On \(service.cookieDomain), choose Develop › Show Web Inspector › Storage › Cookies.
+                    4. Copy the value of “\(service.sessionCookie)” and paste it here.
+                    """)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    SecureField(service.sessionCookie, text: $value)
+                    Button("Use Session") {
+                        Task {
+                            await service.useSession(value)
+                            value = ""
+                            await onApplied()
+                        }
+                    }
+                    .disabled(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .padding(.top, 4)
+        }
     }
 }

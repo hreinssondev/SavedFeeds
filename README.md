@@ -16,6 +16,8 @@ xcodegen generate && open SavedFeeds.xcodeproj
 
 **Instagram**: click **Sign In…** in the Instagram column and log in on instagram.com.
 
+**Passkeys, or a Google login that won't go through**: apps can't use passkeys for other sites in their web views; Apple reserves that for browsers. Sign in in Safari instead, then paste the session cookie (`sessionid` for Instagram, `reddit_session` for Reddit) under **Settings › Use a session from Safari**. The steps are shown there.
+
 ## How it works
 
 - `Core/RedditSource.swift`: the private feed link, or `/user/<you>/saved.json` with the reddit.com session.
