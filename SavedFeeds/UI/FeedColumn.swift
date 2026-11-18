@@ -5,6 +5,7 @@ struct FeedColumn: View {
     @Environment(AppModel.self) private var app
     /// The post at the top of the column.
     @State private var topPostID: String?
+    @AppStorage(FeedZoom.key) private var zoom = 1.0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -82,11 +83,13 @@ struct FeedColumn: View {
                         }
                     }
                     .scrollTargetLayout()
-                    .frame(maxWidth: 640)
+                    .zoomedFont(.body)
+                    .frame(maxWidth: FeedZoom.width * zoom)
                     .padding(20)
                     .frame(maxWidth: .infinity)
                 }
                 .scrollPosition(id: $topPostID, anchor: .top)
+                .environment(\.feedZoom, zoom)
                 // Closing the comments you were scrolled into would leave you further down the feed; go back to their post.
                 .onChange(of: app.openComments) { old, new in
                     if let id = topPostID, old.subtracting(new).contains(id) {

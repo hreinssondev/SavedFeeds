@@ -28,7 +28,8 @@ struct MediaCarousel: View {
             .overlay(alignment: .topTrailing) {
                 if media.count > 1 {
                     Text("\(index + 1)/\(media.count)")
-                        .font(.caption.monospacedDigit())
+                        .zoomedFont(.caption)
+                        .monospacedDigit()
                         .foregroundStyle(.white)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)

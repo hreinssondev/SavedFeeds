@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct SavedFeedsApp: App {
     @State private var app = AppModel()
+    @AppStorage(FeedZoom.key) private var zoom = 1.0
 
     init() {
         // AsyncImage goes through the shared cache; give it room for a feed's worth of media.
@@ -22,6 +23,16 @@ struct SavedFeedsApp: App {
             CommandGroup(before: .toolbar) {
                 Button("Refresh") { Task { await app.refreshAll() } }
                     .keyboardShortcut("r")
+                Divider()
+                Button("Actual Size") { zoom = 1 }
+                    .keyboardShortcut("0")
+                    .disabled(zoom == 1)
+                Button("Zoom In") { zoom = FeedZoom.zoomedIn(from: zoom) }
+                    .keyboardShortcut("+")
+                    .disabled(zoom >= FeedZoom.steps.last!)
+                Button("Zoom Out") { zoom = FeedZoom.zoomedOut(from: zoom) }
+                    .keyboardShortcut("-")
+                    .disabled(zoom <= FeedZoom.steps.first!)
                 Divider()
             }
         }

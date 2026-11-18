@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import SavedFeeds
 
@@ -202,4 +203,24 @@ enum Fixtures {
       {"media":{"code":42}}
     ],"num_results":4,"more_available":true,"next_max_id":"QVFE123","status":"ok"}
     """#
+}
+
+struct FeedZoomTests {
+    @Test func stepsClampAtTheEnds() {
+        #expect(FeedZoom.zoomedIn(from: 1) == 1.1)
+        #expect(FeedZoom.zoomedOut(from: 1) == 0.9)
+        #expect(FeedZoom.zoomedIn(from: 2) == 2)
+        #expect(FeedZoom.zoomedOut(from: 0.7) == 0.7)
+    }
+
+    @Test func zoomScalesFeedText() throws {
+        func size(at zoom: Double) -> CGSize {
+            let text = Text("Saved post").zoomedFont(.body).fixedSize().environment(\.feedZoom, zoom)
+            return ImageRenderer(content: text).nsImage?.size ?? .zero
+        }
+        let normal = size(at: 1), double = size(at: 2)
+        #expect(normal.height > 0)
+        #expect(double.height > normal.height * 1.7)
+        #expect(double.width > normal.width * 1.7)
+    }
 }

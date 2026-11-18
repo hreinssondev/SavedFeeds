@@ -11,7 +11,7 @@ struct PostCard: View {
             header
             if let title = post.title {
                 Text(post.isComment ? "Comment on “\(title)”" : title)
-                    .font(post.isComment ? .subheadline : .title3)
+                    .zoomedFont(post.isComment ? .subheadline : .title3)
                     .fontWeight(.semibold)
                     .foregroundStyle(post.isComment ? .secondary : .primary)
             }
@@ -62,7 +62,7 @@ struct PostCard: View {
             Text(post.date, format: .relative(presentation: .named))
                 .foregroundStyle(.secondary)
         }
-        .font(.subheadline)
+        .zoomedFont(.subheadline)
         .lineLimit(1)
     }
 
@@ -86,7 +86,7 @@ struct PostCard: View {
                 .buttonStyle(.borderless)
                 .help("Open on \(post.service.name)")
         }
-        .font(.subheadline)
+        .zoomedFont(.subheadline)
         .foregroundStyle(.secondary)
     }
 
@@ -124,7 +124,7 @@ private struct LinkRow: View {
                 Spacer()
                 Image(systemName: "arrow.up.right")
             }
-            .font(.subheadline)
+            .zoomedFont(.subheadline)
             .padding(10)
             .background(.quaternary.opacity(0.6), in: .rect(cornerRadius: 8))
             .contentShape(.rect)

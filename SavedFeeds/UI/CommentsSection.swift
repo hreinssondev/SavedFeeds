@@ -50,7 +50,7 @@ struct CommentsSection: View {
                 Link("Open on \(post.service.name)", destination: post.permalink)
             }
         }
-        .font(.callout)
+        .zoomedFont(.callout)
         .task { await model.load() }
     }
 
@@ -94,14 +94,16 @@ private struct CommentRow: View {
             Button { withAnimation(.snappy(duration: 0.2)) { collapsed.toggle() } } label: {
                 HStack(spacing: 6) {
                     Image(systemName: collapsed ? "chevron.right" : "chevron.down")
-                        .font(.caption2.bold())
+                        .zoomedFont(.caption2)
+                            .bold()
                         .foregroundStyle(.tertiary)
                         .frame(width: 10)
                     Text(comment.author)
                         .fontWeight(.semibold)
                     if comment.isSubmitter {
                         Text("OP")
-                            .font(.caption2.bold())
+                            .zoomedFont(.caption2)
+                            .bold()
                             .foregroundStyle(.white)
                             .padding(.horizontal, 4)
                             .background(.blue, in: .rect(cornerRadius: 3))
@@ -120,7 +122,7 @@ private struct CommentRow: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                .font(.subheadline)
+                .zoomedFont(.subheadline)
                 .contentShape(.rect)
             }
             .buttonStyle(.plain)
@@ -170,10 +172,10 @@ private struct CommentRow: View {
                         .controlSize(.mini)
                 }
             }
-            .font(.caption)
+            .zoomedFont(.caption)
         } else {
             Link("\(comment.moreReplies) more \(replies) on \(service.name)", destination: permalink)
-                .font(.caption)
+                .zoomedFont(.caption)
         }
     }
 
