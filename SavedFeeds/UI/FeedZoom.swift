@@ -32,7 +32,11 @@ private struct ZoomedFont: ViewModifier {
     @Environment(\.feedZoom) private var zoom
 
     func body(content: Content) -> some View {
+        #if os(macOS)
         content.font(.system(size: style.macPointSize * zoom))
+        #else
+        content.font(.system(style))
+        #endif
     }
 }
 

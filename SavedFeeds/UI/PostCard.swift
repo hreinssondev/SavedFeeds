@@ -27,7 +27,7 @@ struct PostCard: View {
                     .textSelection(.enabled)
                 if text.count > 320 {
                     Button(expanded ? "Show Less" : "Show More") { expanded.toggle() }
-                        .buttonStyle(.link)
+                        .linkButtonStyle()
                 }
             }
             footer

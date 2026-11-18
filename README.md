@@ -1,12 +1,20 @@
 # SavedFeeds
 
-Your saved Reddit and Instagram posts side by side. macOS now, iOS later (`Core/` is platform-neutral).
+Your saved Reddit and Instagram posts: side by side on the Mac, one feed at a time on iPhone.
 
 ## Build
 
 ```sh
 xcodegen generate && open SavedFeeds.xcodeproj
 ```
+
+Schemes: **SavedFeeds** (Mac) and **SavedFeedsiOS** (iPhone; pick your phone as the destination).
+
+## iPhone
+
+The iPhone app uses the Mac app's sign-ins: after a feed loads on the Mac, the Mac app saves that session to iCloud Keychain, and the iPhone app picks it up when it opens. Sessions are made on the Mac (Safari, passkeys) and copied to the phone; if one expires, sign in again on the Mac. The ⋯ menu has a sign-in on the phone itself as a backup (no passkeys there).
+
+The top bar switches between Reddit and Instagram (Instagram first); pull down to refresh.
 
 ## Connect
 

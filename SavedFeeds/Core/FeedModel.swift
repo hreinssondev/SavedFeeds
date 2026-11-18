@@ -31,6 +31,10 @@ final class FeedModel {
             loadedFirstPage = true
             problem = nil
             FeedCache.save(posts, for: service)
+            #if os(macOS)
+            // The session works: share it with the iPhone app.
+            await SessionSync.publish(service)
+            #endif
         } catch {
             problem = error as? FeedError ?? .failed(error.localizedDescription)
             log.error("\(self.service.rawValue, privacy: .public): \(String(describing: self.problem), privacy: .public)")
@@ -136,6 +140,28 @@ final class AppModel {
             changed.append(service)
         }
         return changed
+    }
+
+    /// iPhone: adopts sign-ins the Mac app shared through iCloud Keychain; returns the services to reload.
+    @discardableResult
+    func importMacSessions() async -> [Service] {
+        var changed: [Service] = []
+        for service in Service.allCases {
+            guard let session = SessionSync.take(service, phoneSignedIn: await service.isSignedIn()) else { continue }
+            if let userAgent = session.userAgent { WebSession.userAgent = userAgent }
+            await WebSession.clear(service.cookieDomain)
+            await WebSession.setCookies(session.cookies.compactMap(\.httpCookie))
+            SitePage.for(service).reload()
+            log.info("Took the Mac's \(service.rawValue, privacy: .public) session from iCloud Keychain")
+            changed.append(service)
+        }
+        return changed
+    }
+
+    func syncMacSessions() async {
+        for service in await importMacSessions() {
+            await feed(for: service).refresh()
+        }
     }
 
     func syncSafariSessions() async {

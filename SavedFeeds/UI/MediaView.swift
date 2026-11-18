@@ -144,6 +144,7 @@ struct VideoTile: View {
     }
 }
 
+#if os(macOS)
 /// AppKit's player view. SwiftUI's `VideoPlayer` aborts as soon as it's created on macOS 27.0.1.
 private struct PlayerView: NSViewRepresentable {
     let player: AVPlayer
@@ -176,3 +177,22 @@ private final class FeedPlayerView: AVPlayerView {
         (enclosingScrollView ?? nextResponder)?.scrollWheel(with: event)
     }
 }
+#else
+/// UIKit's player.
+private struct PlayerView: UIViewControllerRepresentable {
+    let player: AVPlayer
+    let showsControls: Bool
+
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let controller = AVPlayerViewController()
+        controller.player = player
+        controller.showsPlaybackControls = showsControls
+        controller.videoGravity = .resizeAspect
+        return controller
+    }
+
+    func updateUIViewController(_ controller: AVPlayerViewController, context: Context) {
+        if controller.player !== player { controller.player = player }
+    }
+}
+#endif

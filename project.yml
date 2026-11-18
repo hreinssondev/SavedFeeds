@@ -25,6 +25,8 @@ targets:
         com.apple.security.network.client: true
         com.apple.security.application-groups:
           - $(TeamIdentifierPrefix)com.hreinsson.SavedFeeds
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.hreinsson.SavedFeeds.sessions
     info:
       path: SavedFeeds/Info.plist
       properties:
@@ -35,6 +37,7 @@ targets:
         LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
         NSHumanReadableCopyright: © 2026 Hlynur Hreinsson
         SessionGroup: $(TeamIdentifierPrefix)com.hreinsson.SavedFeeds
+        KeychainGroup: $(AppIdentifierPrefix)com.hreinsson.SavedFeeds.sessions
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hreinsson.SavedFeeds
@@ -79,6 +82,57 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         CODE_SIGN_STYLE: Automatic
         ENABLE_HARDENED_RUNTIME: YES
+  SavedFeedsiOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - SavediOS
+      - SavedFeeds/Core
+      - SavedFeeds/AppIcon.icon
+      - SavedFeeds/Assets.xcassets
+      # The post views are shared with the Mac app.
+      - SavedFeeds/UI/PostCard.swift
+      - SavedFeeds/UI/CommentsSection.swift
+      - SavedFeeds/UI/MediaView.swift
+      - SavedFeeds/UI/FeedZoom.swift
+      - SavedFeeds/UI/OpenedPost.swift
+      - SavedFeeds/UI/ServiceStyle.swift
+      - SavedFeeds/UI/SignInSheet.swift
+    entitlements:
+      path: SavediOS/SavedFeedsiOS.entitlements
+      properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.hreinsson.SavedFeeds.sessions
+    info:
+      path: SavediOS/Info.plist
+      properties:
+        CFBundleDisplayName: SavedFeeds
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        KeychainGroup: $(AppIdentifierPrefix)com.hreinsson.SavedFeeds.sessions
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hreinsson.SavedFeedsiOS
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme: {}
   SavedFeedsTests:
     type: bundle.unit-test
     platform: macOS

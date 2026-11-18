@@ -35,6 +35,9 @@ final class SitePage: NSObject, WKNavigationDelegate {
         webView.navigationDelegate = self
     }
 
+    /// The web view, for iOS to keep in a window (it only runs pages that are in one).
+    var hostedView: WKWebView { webView }
+
     /// Loads the site afresh before the next fetch (after its cookies changed).
     func reload() {
         isReady = false

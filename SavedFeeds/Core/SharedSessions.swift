@@ -22,6 +22,16 @@ nonisolated enum SharedSessions {
         /// Seconds since 1970; absent for session cookies.
         let expirationDate: Double?
 
+        init(_ cookie: HTTPCookie) {
+            name = cookie.name
+            value = cookie.value
+            domain = cookie.domain
+            path = cookie.path
+            secure = cookie.isSecure
+            httpOnly = cookie.isHTTPOnly
+            expirationDate = cookie.expiresDate?.timeIntervalSince1970
+        }
+
         var httpCookie: HTTPCookie? {
             var properties: [HTTPCookiePropertyKey: Any] = [.name: name, .value: value, .domain: domain, .path: path]
             if secure == true { properties[.secure] = "TRUE" }

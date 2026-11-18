@@ -17,7 +17,7 @@ struct CommentsSection: View {
                         Text(problem.localizedDescription)
                             .foregroundStyle(.secondary)
                         Button("Try Again") { Task { await model.load() } }
-                            .buttonStyle(.link)
+                            .linkButtonStyle()
                     }
                 } else if model.isLoading {
                     HStack(spacing: 8) {
@@ -45,7 +45,7 @@ struct CommentsSection: View {
             }
             HStack {
                 Button("Hide Comments", action: onHide)
-                    .buttonStyle(.link)
+                    .linkButtonStyle()
                 Spacer()
                 Link("Open on \(post.service.name)", destination: post.permalink)
             }
@@ -58,7 +58,7 @@ struct CommentsSection: View {
     private var more: some View {
         if shown < model.comments.count {
             Button("Show More Comments") { shown += 20 }
-                .buttonStyle(.link)
+                .linkButtonStyle()
         } else if model.canLoadMore {
             HStack(spacing: 8) {
                 Button("Load More Comments") {
@@ -67,7 +67,7 @@ struct CommentsSection: View {
                         shown = model.comments.count
                     }
                 }
-                .buttonStyle(.link)
+                .linkButtonStyle()
                 .disabled(model.isLoading)
                 if model.isLoading {
                     ProgressView()
@@ -165,7 +165,7 @@ private struct CommentRow: View {
                         loadingReplies = false
                     }
                 }
-                .buttonStyle(.link)
+                .linkButtonStyle()
                 .disabled(loadingReplies)
                 if loadingReplies {
                     ProgressView()

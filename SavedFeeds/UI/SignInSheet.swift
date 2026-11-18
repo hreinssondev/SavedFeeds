@@ -45,7 +45,9 @@ struct SignInSheet: View {
                 }
             }
         }
+        #if os(macOS)
         .frame(width: 480, height: 700)
+        #endif
         .task {
             browser = LoginBrowser(url: service.loginURL)
             while !Task.isCancelled {
@@ -116,6 +118,7 @@ final class LoginBrowser: NSObject, WKUIDelegate, WKNavigationDelegate {
     }
 }
 
+#if os(macOS)
 private struct WebViewHost: NSViewRepresentable {
     let webView: WKWebView
 
@@ -123,3 +126,12 @@ private struct WebViewHost: NSViewRepresentable {
 
     func updateNSView(_ webView: WKWebView, context: Context) {}
 }
+#else
+private struct WebViewHost: UIViewRepresentable {
+    let webView: WKWebView
+
+    func makeUIView(context: Context) -> WKWebView { webView }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {}
+}
+#endif

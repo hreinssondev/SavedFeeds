@@ -112,6 +112,23 @@ struct InstagramParserTests {
     }
 }
 
+struct SessionSyncTests {
+    @Test func cookiesSurviveTheTripThroughTheKeychainFormat() throws {
+        let expiry = Date.now.addingTimeInterval(30 * 86_400)
+        let original = try #require(HTTPCookie(properties: [
+            .name: "sessionid", .value: "abc", .domain: ".instagram.com", .path: "/", .secure: "TRUE",
+            HTTPCookiePropertyKey("HttpOnly"): "TRUE", .expires: expiry,
+        ]))
+        let session = SessionSync.Session(cookies: [SharedSessions.Cookie(original)], userAgent: "Safari")
+        let decoded = try JSONDecoder().decode(SessionSync.Session.self, from: JSONEncoder().encode(session))
+        let cookie = try #require(decoded.cookies.first?.httpCookie)
+        #expect(decoded.userAgent == "Safari")
+        #expect(cookie.name == "sessionid" && cookie.value == "abc" && cookie.domain == ".instagram.com")
+        #expect(cookie.isSecure && cookie.isHTTPOnly)
+        #expect(abs((cookie.expiresDate?.timeIntervalSince1970 ?? 0) - expiry.timeIntervalSince1970) < 1)
+    }
+}
+
 struct SafariHandoffTests {
     @Test func cookiesKeepTheirAttributes() throws {
         // HTTPCookie caps expiry at 400 days out, so stay inside that.
