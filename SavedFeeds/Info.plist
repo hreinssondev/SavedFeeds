@@ -26,5 +26,7 @@
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 Hlynur Hreinsson</string>
+	<key>SessionGroup</key>
+	<string>$(TeamIdentifierPrefix)com.hreinsson.SavedFeeds</string>
 </dict>
 </plist>

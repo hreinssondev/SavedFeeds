@@ -16,13 +16,18 @@ xcodegen generate && open SavedFeeds.xcodeproj
 
 **Instagram**: click **Sign In…** in the Instagram column and log in on instagram.com.
 
-**Passkeys, or a Google login that won't go through**: apps can't use passkeys for other sites in their web views; Apple reserves that for browsers. Sign in in Safari instead, then paste the session cookie (`sessionid` for Instagram, `reddit_session` for Reddit) under **Settings › Use a session from Safari**. The steps are shown there.
+**Passkeys**: apps can't use passkeys for other sites in their web views; Apple reserves that for browsers. So sign in in Safari, and the bundled **SavedFeeds Session** Safari extension hands the session to the app:
+1. Run SavedFeeds once. Then open Safari › Settings › Extensions (or SavedFeeds › Settings › Open Safari Extensions…).
+2. Turn on **SavedFeeds Session** and allow it on reddit.com and instagram.com.
+3. Visit reddit.com / instagram.com in Safari while signed in. SavedFeeds picks the session up right away.
+
+Without the extension, you can paste the session cookie by hand (`reddit_session` / `sessionid`) under **Settings › Paste a session from Safari**.
 
 ## How it works
 
 - `Core/RedditSource.swift`: the private feed link, or `/user/<you>/saved.json` with the reddit.com session.
 - `Core/InstagramSource.swift`: `/api/v1/feed/saved/posts/`, the endpoint instagram.com's Saved page uses, with the web session.
-- Sign-ins run in a web view (`UI/SignInSheet.swift`). Feed requests reuse its cookies (`Core/WebSession.swift`).
+- Sign-ins run in a web view (`UI/SignInSheet.swift`) or come from Safari via the extension (`SafariExtension/`, `Core/SharedSessions.swift`, through an App Group). Feed requests reuse those cookies (`Core/WebSession.swift`).
 - The feed link is kept in the Keychain. The last loaded posts are cached in Application Support.
 
 ## Caveats

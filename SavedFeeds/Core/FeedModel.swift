@@ -81,6 +81,26 @@ final class AppModel {
         _ = await (reddit, instagram)
     }
 
+    /// Adopts sign-ins the Safari extension handed over; returns the services whose session changed.
+    @discardableResult
+    func importSafariSessions() async -> [Service] {
+        var changed: [Service] = []
+        for (key, value) in SharedSessions.take() {
+            guard let service = Service(rawValue: key),
+                  await WebSession.cookie(service.sessionCookie, for: service.cookieDomain) != value
+            else { continue }
+            await service.useSession(value)
+            changed.append(service)
+        }
+        return changed
+    }
+
+    func syncSafariSessions() async {
+        for service in await importSafariSessions() {
+            await feed(for: service).refresh()
+        }
+    }
+
     func signOut(_ service: Service) async {
         await service.signOut()
         feed(for: service).clear()

@@ -1,3 +1,4 @@
+import SafariServices
 import SwiftUI
 
 struct SettingsView: View {
@@ -9,6 +10,19 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section {
+                Text("Sign in on reddit.com and instagram.com in Safari, where your passkeys work. The SavedFeeds Session extension hands each sign-in to this app.")
+                Button("Open Safari Extensions…") {
+                    SFSafariApplication.showPreferencesForExtension(withIdentifier: SafariExtension.identifier) { _ in }
+                }
+            } header: {
+                Text("Sign in with Safari")
+            } footer: {
+                Text("Turn on SavedFeeds Session and allow it on reddit.com and instagram.com. Then visit either site in Safari while signed in.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section {
                 TextField("Feed link", text: $feedLink, prompt: Text("https://www.reddit.com/user/…/saved.json?feed=…"))
                     .onChange(of: feedLink) {
@@ -98,14 +112,14 @@ struct SettingsView: View {
     }
 }
 
-/// For sign-ins the in-app web view can't do (passkeys; sometimes Google): copy the session cookie out of Safari.
+/// The extension's job by hand, for when it isn't turned on: copy the session cookie out of Safari.
 private struct BrowserSessionRow: View {
     let service: Service
     let onApplied: () async -> Void
     @State private var value = ""
 
     var body: some View {
-        DisclosureGroup("Use a session from Safari") {
+        DisclosureGroup("Paste a session from Safari") {
             VStack(alignment: .leading, spacing: 8) {
                 Text("""
                     1. Sign in on \(service.cookieDomain) in Safari, with a passkey or any other way.
@@ -131,4 +145,8 @@ private struct BrowserSessionRow: View {
             .padding(.top, 4)
         }
     }
+}
+
+enum SafariExtension {
+    static let identifier = (Bundle.main.bundleIdentifier ?? "com.hreinsson.SavedFeeds") + ".Safari"
 }

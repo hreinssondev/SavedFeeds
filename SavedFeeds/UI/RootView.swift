@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 struct RootView: View {
@@ -22,7 +23,17 @@ struct RootView: View {
                 SettingsLink { Label("Settings", systemImage: "gearshape") }
             }
         }
-        .task { await app.refreshAll() }
+        .task {
+            await app.importSafariSessions()
+            await app.refreshAll()
+        }
+        // The Safari extension says it handed over a session; becoming active covers a missed signal.
+        .onReceive(DistributedNotificationCenter.default().publisher(for: SharedSessions.changed).receive(on: RunLoop.main)) { _ in
+            Task { await app.syncSafariSessions() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task { await app.syncSafariSessions() }
+        }
         .sheet(item: $app.signingIn) { service in
             SignInSheet(service: service) {
                 Task { await app.feed(for: service).refresh() }

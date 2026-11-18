@@ -16,11 +16,15 @@ targets:
     platform: macOS
     sources:
       - SavedFeeds
+    dependencies:
+      - target: SavedFeedsSafari
     entitlements:
       path: SavedFeeds/SavedFeeds.entitlements
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.network.client: true
+        com.apple.security.application-groups:
+          - $(TeamIdentifierPrefix)com.hreinsson.SavedFeeds
     info:
       path: SavedFeeds/Info.plist
       properties:
@@ -30,6 +34,7 @@ targets:
         LSApplicationCategoryType: public.app-category.social-networking
         LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
         NSHumanReadableCopyright: © 2026 Hlynur Hreinsson
+        SessionGroup: $(TeamIdentifierPrefix)com.hreinsson.SavedFeeds
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hreinsson.SavedFeeds
@@ -41,6 +46,39 @@ targets:
     scheme:
       testTargets:
         - SavedFeedsTests
+  SavedFeedsSafari:
+    type: app-extension
+    platform: macOS
+    sources:
+      - SafariExtension/Handler
+      - path: SafariExtension/Resources
+        buildPhase: resources
+      - SavedFeeds/Core/SharedSessions.swift
+    entitlements:
+      path: SafariExtension/SavedFeedsSafari.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups:
+          - $(TeamIdentifierPrefix)com.hreinsson.SavedFeeds
+    info:
+      path: SafariExtension/Info.plist
+      properties:
+        CFBundleDisplayName: SavedFeeds Session
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
+        NSHumanReadableCopyright: © 2026 Hlynur Hreinsson
+        SessionGroup: $(TeamIdentifierPrefix)com.hreinsson.SavedFeeds
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.Safari.web-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hreinsson.SavedFeeds.Safari
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
   SavedFeedsTests:
     type: bundle.unit-test
     platform: macOS
