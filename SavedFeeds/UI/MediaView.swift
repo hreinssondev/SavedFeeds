@@ -151,19 +151,16 @@ private struct PlayerView: NSViewRepresentable {
     }
 }
 
-/// Leaves vertical scrolling to the feed; AVPlayerView would scrub the video with it. Horizontal swipes still scrub.
+/// Leaves all scrolling to the feed; AVPlayerView would scrub the video with it.
 private final class FeedPlayerView: AVPlayerView {
-    private var scrollsFeed = true
+    /// The scrubbing lives in AVKit's internal content view, which takes the event and never passes it up,
+    /// so claim scroll events here before they reach it. Clicks and hovers still go to the controls.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        let hit = super.hitTest(point)
+        return hit != nil && NSApp.currentEvent?.type == .scrollWheel ? self : hit
+    }
 
     override func scrollWheel(with event: NSEvent) {
-        // Decide once per gesture (momentum events carry no phase), or per notch for a mouse wheel.
-        if event.phase == .began || event.phase == .mayBegin || (event.phase == [] && event.momentumPhase == []) {
-            scrollsFeed = abs(event.scrollingDeltaY) >= abs(event.scrollingDeltaX)
-        }
-        if scrollsFeed {
-            (enclosingScrollView ?? nextResponder)?.scrollWheel(with: event)
-        } else {
-            super.scrollWheel(with: event)
-        }
+        (enclosingScrollView ?? nextResponder)?.scrollWheel(with: event)
     }
 }
