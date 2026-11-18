@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import SwiftUI
 import Testing
@@ -222,5 +223,36 @@ struct FeedZoomTests {
         #expect(normal.height > 0)
         #expect(double.height > normal.height * 1.7)
         #expect(double.width > normal.width * 1.7)
+    }
+}
+
+struct EscapeKeyTests {
+    final class Count { var value = 0 }
+
+    /// Posts a real Esc key-down to a window holding EscapeKey and lets the run loop deliver it.
+    private func pressEsc(active: Bool) async throws -> (handled: Int, window: NSWindow) {
+        let count = Count()
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200), styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(rootView: Color.clear.background(EscapeKey(isActive: active) { count.value += 1 }))
+        window.makeKeyAndOrderFront(nil)
+        try await Task.sleep(for: .milliseconds(200))
+        let esc = try #require(NSEvent.keyEvent(
+            with: .keyDown, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+            windowNumber: window.windowNumber, context: nil, characters: "\u{1b}", charactersIgnoringModifiers: "\u{1b}",
+            isARepeat: false, keyCode: 53
+        ))
+        NSApp.postEvent(esc, atStart: false)
+        try await Task.sleep(for: .milliseconds(300))
+        window.orderOut(nil)
+        return (count.value, window)
+    }
+
+    @Test func escCallsTheActionWhileActive() async throws {
+        #expect(try await pressEsc(active: true).handled == 1)
+    }
+
+    @Test func escIsLeftAloneWhenInactive() async throws {
+        #expect(try await pressEsc(active: false).handled == 0)
     }
 }

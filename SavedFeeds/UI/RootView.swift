@@ -16,20 +16,12 @@ struct RootView: View {
         // The title bar is hidden; the columns' header bars take its place, level with the window controls.
         .ignoresSafeArea(.container, edges: .top)
         .background(WindowControlsProbe { controlsCenterY = $0 })
-        .background {
-            // Esc closes an opened post, or else every open comment section (disabled when there's
-            // neither, so Esc keeps its other uses).
-            Button("Close") {
-                withAnimation(.snappy(duration: 0.25)) {
-                    if app.openedPost != nil { app.closeOpenedPost() } else { app.closeAllComments() }
-                }
+        // Esc closes an opened post, or else every open comment section.
+        .background(EscapeKey(isActive: app.openedPost != nil || !app.openComments.isEmpty) {
+            withAnimation(.snappy(duration: 0.25)) {
+                if app.openedPost != nil { app.closeOpenedPost() } else { app.closeAllComments() }
             }
-            .keyboardShortcut(.escape, modifiers: [])
-            .disabled(app.openedPost == nil && app.openComments.isEmpty)
-            .opacity(0)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
-        }
+        })
         .overlay {
             if let post = app.openedPost {
                 OpenedPostOverlay(post: post) {
@@ -58,6 +50,53 @@ struct RootView: View {
     }
 
     private var headerHeight: CGFloat { max(28, controlsCenterY * 2) }
+}
+
+/// Calls `action` on Esc in this window while `isActive`, whatever has focus: a keyboard shortcut never sees Esc
+/// once something in a post (selected text, the video player) has taken focus. Left alone when inactive, or for a
+/// sheet or another window, so Esc keeps its usual jobs there.
+struct EscapeKey: NSViewRepresentable {
+    let isActive: Bool
+    let action: () -> Void
+
+    func makeNSView(context: Context) -> Monitor { Monitor() }
+
+    func updateNSView(_ view: Monitor, context: Context) {
+        view.isActive = isActive
+        view.action = action
+    }
+
+    final class Monitor: NSView {
+        var isActive = false
+        var action: () -> Void = {}
+        private var monitor: Any?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let monitor {
+                NSEvent.removeMonitor(monitor)
+                self.monitor = nil
+            }
+            guard window != nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                let keyCode = event.keyCode
+                let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+                let windowNumber = event.windowNumber
+                let handled = MainActor.assumeIsolated {
+                    self?.handle(keyCode: keyCode, modifiers: modifiers, windowNumber: windowNumber) ?? false
+                }
+                return handled ? nil : event
+            }
+        }
+
+        private func handle(keyCode: UInt16, modifiers: NSEvent.ModifierFlags, windowNumber: Int) -> Bool {
+            guard isActive, keyCode == 53, modifiers.isEmpty, // 53: Esc
+                  let window, window.windowNumber == windowNumber, window.attachedSheet == nil
+            else { return false }
+            action()
+            return true
+        }
+    }
 }
 
 /// Reports how far below the window's top edge the window controls are centered.
