@@ -105,11 +105,17 @@ struct PostCard: View {
         #endif
     }
 
-    /// Bold, italics, links and code; keeps line breaks.
+    /// Bold, italics, links and code; keeps line breaks. Parsed once per text: bodies rerun while scrolling.
     static func rich(_ text: String) -> AttributedString {
-        (try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+        if let cached = richCache[text] { return cached }
+        let rich = (try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
             ?? AttributedString(text)
+        if richCache.count > 2000 { richCache.removeAll() }
+        richCache[text] = rich
+        return rich
     }
+
+    private static var richCache: [String: AttributedString] = [:]
 }
 
 private struct LinkRow: View {

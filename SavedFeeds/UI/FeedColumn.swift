@@ -6,8 +6,7 @@ struct FeedColumn: View {
     let headerHeight: CGFloat
     @State private var hoveringHeader = false
     @Environment(AppModel.self) private var app
-    /// The post at the top of the column.
-    @State private var topPostID: String?
+    @State private var topEdge = TopEdge()
     @AppStorage(FeedZoom.key) private var zoom = 1.0
 
     var body: some View {
@@ -86,6 +85,12 @@ struct FeedColumn: View {
                         ForEach(feed.posts) { post in
                             PostCard(post: post)
                                 .id(post.id)
+                                .onGeometryChange(for: Bool.self) { proxy in
+                                    let frame = proxy.frame(in: .scrollView)
+                                    return frame.minY < 0 && frame.maxY > 0
+                                } action: { straddles in
+                                    if straddles { topEdge.posts.insert(post.id) } else { topEdge.posts.remove(post.id) }
+                                }
                         }
                         if feed.canLoadMore {
                             ProgressView()
@@ -94,17 +99,15 @@ struct FeedColumn: View {
                                 .task(id: feed.posts.count) { await feed.loadMore() }
                         }
                     }
-                    .scrollTargetLayout()
                     .zoomedFont(.body)
                     .frame(maxWidth: FeedZoom.width * zoom)
                     .padding(20)
                     .frame(maxWidth: .infinity)
                 }
-                .scrollPosition(id: $topPostID, anchor: .top)
                 .environment(\.feedZoom, zoom)
                 // Closing the comments you were scrolled into would leave you further down the feed; go back to their post.
                 .onChange(of: app.openComments) { old, new in
-                    if let id = topPostID, old.subtracting(new).contains(id) {
+                    if let id = old.subtracting(new).first(where: topEdge.posts.contains) {
                         proxy.scrollTo(id, anchor: .top)
                     }
                 }
@@ -138,6 +141,12 @@ struct FeedColumn: View {
             Button("Try Again") { Task { await feed.refresh() } }
         }
     }
+}
+
+/// The posts straddling a column's top edge. Kept out of view state on purpose: it changes at every post
+/// while scrolling, and is only read when comments close.
+private final class TopEdge {
+    var posts: Set<String> = []
 }
 
 struct ConnectView: View {
