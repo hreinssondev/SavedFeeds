@@ -269,16 +269,30 @@ struct VideoPlayerView: View {
 }
 
 /// Sound: silent clips mix in under whatever else is playing; a video you play gets the sound, even with the
-/// ring switch off, as in other video apps.
+/// ring switch off, as in other video apps. The audio session is set off the main thread (it can block).
 enum Playback {
+    private static let queue = DispatchQueue(label: "com.hreinsson.SavedFeeds.audio")
+
+    /// At launch: clips don't interrupt music.
+    static func start() {
+        queue.async {
+            try? AVAudioSession.sharedInstance().setCategory(.ambient, options: .mixWithOthers)
+        }
+    }
+
+    /// After a video: back to quiet, letting other audio resume.
     static func quiet() {
-        try? AVAudioSession.sharedInstance().setCategory(.ambient, options: .mixWithOthers)
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        queue.async {
+            try? AVAudioSession.sharedInstance().setCategory(.ambient, options: .mixWithOthers)
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        }
     }
 
     static func withSound() {
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
-        try? AVAudioSession.sharedInstance().setActive(true)
+        queue.async {
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+            try? AVAudioSession.sharedInstance().setActive(true)
+        }
     }
 }
 

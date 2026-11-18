@@ -167,6 +167,12 @@ struct PhoneRootView: View {
             if selection == .reddit { redditLayout = layout } else { instagramLayout = layout }
         }
         if let words = defaults.string(forKey: "demoQuery") { query = words }
+        // `-demoLoadPages YES`: put a real page in the hidden web views, to see that it stays hidden.
+        if defaults.bool(forKey: "demoLoadPages") {
+            for page in [SitePage.reddit, .instagram] {
+                page.hostedView.load(URLRequest(url: URL(string: "https://example.com")!))
+            }
+        }
         if let id = defaults.string(forKey: "demoPost"), let post = app.feed(for: selection).posts.first(where: { $0.id == id }) {
             path = [PostRoute(post: post, toComments: defaults.bool(forKey: "demoComments"))]
         }
