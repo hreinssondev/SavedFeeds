@@ -15,6 +15,8 @@ struct PhoneRootView: View {
     @State private var browsing: Browsed?
     @State private var signedIn: Set<Service> = []
     @State private var toTop: [Service: Int] = [:]
+    /// The home indicator's strip, which the feeds run under.
+    @State private var bottomInset: CGFloat = 0
     @AppStorage("phoneLayout.reddit") private var redditLayout = PhoneLayout.full
     @AppStorage("phoneLayout.instagram") private var instagramLayout = PhoneLayout.full
     @Namespace private var zoom
@@ -31,7 +33,8 @@ struct PhoneRootView: View {
                         query: query,
                         layout: layout(for: service),
                         namespace: zoom,
-                        toTop: toTop[service, default: 0]
+                        toTop: toTop[service, default: 0],
+                        bottomInset: bottomInset
                     ) { route in
                         path.append(route)
                     }
@@ -39,11 +42,15 @@ struct PhoneRootView: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            // Down to the screen's edge, under the home indicator; each feed keeps its end clear of it.
+            .ignoresSafeArea(.container, edges: .bottom)
+            .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = $0 }
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaBar(edge: .top) {
                 if searching { searchBar }
             }
-            .safeAreaBar(edge: .bottom) { switcher }
+            // Floating over the feed, which runs on beneath it to the bottom edge.
+            .overlay(alignment: .bottom) { switcher }
             .overlay(alignment: .topTrailing) {
                 if !searching { menu }
             }

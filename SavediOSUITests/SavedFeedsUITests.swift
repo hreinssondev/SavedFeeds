@@ -101,6 +101,23 @@ final class SavedFeedsUITests: XCTestCase {
         keep("Scrolled")
     }
 
+    func testTheFeedRunsUnderTheBarAndItsEndClearsIt() {
+        app.launchArguments += ["-demoService", "reddit", "-demoLayout", "grid"]
+        app.launch()
+        XCTAssertTrue(reddit.waitForExistence(timeout: 10))
+        let last = app.staticTexts["Liquid Glass after a year: what I like and what still bugs me"]
+        XCTAssertTrue(last.waitForExistence(timeout: 5))
+        for _ in 0..<3 { app.swipeUp() }
+        // The bar's glass reaches a few points past its buttons.
+        XCTAssertLessThanOrEqual(last.frame.maxY, reddit.frame.minY - 4, "The last post scrolls clear of the bar")
+        keep("End of the Reddit grid")
+
+        app.buttons["menu"].tap()
+        app.buttons["Cards"].tap()
+        app.swipeUp()
+        keep("Reddit cards under the bar")
+    }
+
     private func keep(_ name: String) {
         let screenshot = XCTAttachment(screenshot: app.screenshot())
         screenshot.name = name

@@ -46,6 +46,8 @@ struct FeedScreen: View {
     let namespace: Namespace.ID
     /// Changes when the feed should scroll back to its top.
     let toTop: Int
+    /// The home indicator's strip: the feed runs under it, so its end has to clear it too.
+    var bottomInset: CGFloat = 0
     let open: (PostRoute) -> Void
     @Environment(AppModel.self) private var app
 
@@ -59,6 +61,10 @@ struct FeedScreen: View {
             }
             .background(Color(.systemBackground))
             .scrollEdgeEffectStyle(.soft, for: .top)
+            // Posts show all the way down, under the floating feed bar; the end of the feed clears it.
+            .scrollEdgeEffectHidden(true, for: .bottom)
+            .contentMargins(.bottom, bottomInset + Self.barClearance, for: .scrollContent)
+            .contentMargins(.bottom, bottomInset, for: .scrollIndicators)
             .refreshable { await feed.refresh() }
             .scrollDismissesKeyboard(.immediately)
             .onChange(of: toTop) {
@@ -68,6 +74,8 @@ struct FeedScreen: View {
     }
 
     private static let top = "top"
+    /// Room under the last post for the feed bar floating at the bottom.
+    private static let barClearance: CGFloat = 64
 
     @ViewBuilder
     private var content: some View {
