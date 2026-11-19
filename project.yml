@@ -133,7 +133,29 @@ targets:
         CODE_SIGN_STYLE: Automatic
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-    scheme: {}
+    scheme:
+      testTargets:
+        - SavediOSUITests
+  SavediOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: SavediOSUITests
+        excludes:
+          - Demo
+      - path: SavediOSUITests/Demo
+        type: folder
+    dependencies:
+      - target: SavedFeedsiOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.hreinsson.SavediOSUITests
+        CODE_SIGN_STYLE: Automatic
+        # XCTestCase isn't main-actor isolated; UI tests use XCTest's plain defaults.
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        SWIFT_VERSION: "5.0"
   SavedFeedsTests:
     type: bundle.unit-test
     platform: macOS

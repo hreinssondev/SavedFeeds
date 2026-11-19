@@ -6,24 +6,34 @@ struct PostRoute: Hashable {
     var toComments = false
 }
 
-/// How a feed lays its posts out: whole posts, or Instagram's grid / Reddit's compact list.
-enum PhoneLayout: String {
-    case full, compact
+/// How a feed lays its posts out: whole posts, a compact list (Reddit), or a grid.
+enum PhoneLayout: String, Identifiable {
+    case full, compact, grid
+
+    var id: Self { self }
+
+    static func options(for service: Service) -> [PhoneLayout] {
+        service == .reddit ? [.full, .compact, .grid] : [.full, .grid]
+    }
+
+    /// Instagram has no compact list; before Reddit had a grid, Instagram's grid was stored as "compact".
+    func resolved(for service: Service) -> PhoneLayout {
+        service == .instagram && self == .compact ? .grid : self
+    }
 
     func name(for service: Service) -> String {
-        switch (self, service) {
-        case (.full, .instagram): "Feed"
-        case (.full, .reddit): "Cards"
-        case (.compact, .instagram): "Grid"
-        case (.compact, .reddit): "Compact"
+        switch self {
+        case .full: service == .instagram ? "Feed" : "Cards"
+        case .compact: "Compact"
+        case .grid: "Grid"
         }
     }
 
-    func symbol(for service: Service) -> String {
-        switch (self, service) {
-        case (.full, _): "rectangle.portrait"
-        case (.compact, .instagram): "square.grid.3x3"
-        case (.compact, .reddit): "list.bullet"
+    var symbol: String {
+        switch self {
+        case .full: "rectangle.portrait"
+        case .compact: "list.bullet"
+        case .grid: "square.grid.3x3"
         }
     }
 }
@@ -48,6 +58,7 @@ struct FeedScreen: View {
                 content
             }
             .background(Color(.systemBackground))
+            .scrollEdgeEffectStyle(.soft, for: .top)
             .refreshable { await feed.refresh() }
             .scrollDismissesKeyboard(.immediately)
             .onChange(of: toTop) {
@@ -72,10 +83,10 @@ struct FeedScreen: View {
                 ContentUnavailableView.search(text: query)
                     .padding(.top, 40)
             } else {
-                switch (layout, feed.service) {
-                case (.compact, .instagram): grid(posts)
-                case (.compact, .reddit): compactList(posts)
-                case (.full, _): fullPosts(posts)
+                switch layout {
+                case .full: fullPosts(posts)
+                case .compact: compactList(posts)
+                case .grid: grid(posts)
                 }
             }
             footer
@@ -101,7 +112,7 @@ struct FeedScreen: View {
         .frame(maxWidth: .infinity)
     }
 
-    /// Instagram's saved grid: three across, tall thumbnails, marks for carousels and videos.
+    /// Three across, tall tiles, marks for carousels and videos, like Instagram's saved grid.
     private func grid(_ posts: [SavedPost]) -> some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 110, maximum: 220), spacing: 2)], spacing: 2) {
             ForEach(posts) { post in
@@ -219,7 +230,8 @@ struct FeedScreen: View {
     }
 }
 
-/// A grid square: the post's first picture, with a mark for carousels and videos.
+/// A grid tile: the post's first picture, marked when it's a carousel or a video. Reddit's add their title over the
+/// picture, or, without one, are the title (or the saved comment) on the subreddit's color.
 private struct GridCell: View {
     let post: SavedPost
 
@@ -227,10 +239,28 @@ private struct GridCell: View {
         Color.clear
             .aspectRatio(3 / 4, contentMode: .fit)
             .overlay {
-                CachedImage(url: post.thumbnail, size: 220)
+                if let thumbnail = post.thumbnail {
+                    CachedImage(url: thumbnail, size: 220)
+                } else {
+                    TextTile(post: post)
+                }
+            }
+            .overlay(alignment: .bottomLeading) {
+                if post.service == .reddit, post.thumbnail != nil, let title = post.title {
+                    Text(title)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(2)
+                        .shadow(color: .black.opacity(0.4), radius: 1)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(LinearGradient(colors: [.black.opacity(0.7), .clear], startPoint: .bottom, endPoint: .top))
+                }
             }
             .clipped()
-            .overlay(alignment: .topTrailing) {
+            // Top left: the floating ⋯ button covers the top right of the first row.
+            .overlay(alignment: .topLeading) {
                 if let mark {
                     Image(systemName: mark)
                         .font(.system(size: 13, weight: .semibold))
@@ -246,6 +276,35 @@ private struct GridCell: View {
         if post.media.count > 1 { return "square.fill.on.square.fill" }
         if let first = post.media.first, first.kind != .image { return "play.fill" }
         return nil
+    }
+}
+
+/// A Reddit post without a picture, as a tile: its title (or the saved comment) on its subreddit's color.
+private struct TextTile: View {
+    let post: SavedPost
+
+    var body: some View {
+        Rectangle()
+            .fill(Avatar.color(for: post.community ?? post.author).gradient)
+            .overlay(alignment: .topLeading) {
+                Image(systemName: post.isComment ? "quote.opening" : post.link != nil ? "link" : "text.alignleft")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .padding(8)
+            }
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(post.isComment ? (post.text ?? "") : (post.title ?? post.text ?? ""))
+                        .font(.caption.weight(.semibold))
+                        .lineLimit(post.isComment ? 5 : 6)
+                    Text(post.community ?? "u/\(post.author)")
+                        .font(.caption2)
+                        .opacity(0.85)
+                        .lineLimit(1)
+                }
+                .foregroundStyle(.white)
+                .padding(8)
+            }
     }
 }
 

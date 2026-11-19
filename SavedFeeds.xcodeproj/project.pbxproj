@@ -14,6 +14,7 @@
 		0FB883234C2E5B3A9B8E7055 /* PostDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27BD883895D36A8BAF066353 /* PostDetailView.swift */; };
 		12E0B0325149910D0BE792DF /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 5EC7824EFFF7CB86A7636AAF /* content.js */; };
 		18C21C88B1B582F86FF081BF /* WebSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E733031A24D7DC61F8872D1F /* WebSession.swift */; };
+		1E37FFFD68F24CD45C91569A /* Demo in Resources */ = {isa = PBXBuildFile; fileRef = 8827A31D333E2CB64B40A37D /* Demo */; };
 		1EE7EA0DF9D20DA02A85A246 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26533DA25CF2150A27E37133 /* Credentials.swift */; };
 		1F17FC0EEC09B6167482E7FB /* OpenedPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00AED1E675275A4D6B106337 /* OpenedPost.swift */; };
 		2134931D889DF102112A7F7F /* SharedSessions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC564EF4827885057BA7DBC /* SharedSessions.swift */; };
@@ -28,6 +29,7 @@
 		4477BA91428701A131D4BF55 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = D3883B205955D6F54CE6EFD1 /* AppIcon.icon */; };
 		449D16D1DB111E14E371E62E /* FeedSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2162F9F064A351F1BBE050E2 /* FeedSource.swift */; };
 		45612FFC951BA6B59F1BD435 /* SessionSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6A0235006EEDA1D34FFD5A /* SessionSync.swift */; };
+		462463B796E1D634F05CC7B5 /* SavedFeedsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACF42C7C3F825D5A5B4BA896 /* SavedFeedsUITests.swift */; };
 		530C4F126746FBA9E638341D /* Comments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BBAC5DB90E4B1B1053BC3 /* Comments.swift */; };
 		5514734455EBFAF6FF52C042 /* FeedModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA773B3411CA12E94DE08414 /* FeedModel.swift */; };
 		57854BC9455E1CA5B9133A07 /* SavedFeedsiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5296D47CD1E9C3055B34433 /* SavedFeedsiOSApp.swift */; };
@@ -87,6 +89,13 @@
 			remoteGlobalIDString = 3F5A4162C2EC477801E42D62;
 			remoteInfo = SavedFeeds;
 		};
+		FD90F92F8766AFDD0DBAB238 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F566119D3D1EF73AF6FA9BBF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F4C9A35D9DA169B63AA6F293;
+			remoteInfo = SavedFeedsiOS;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -126,10 +135,12 @@
 		75D58EF80751E26BAC6447CF /* MediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaView.swift; sourceTree = "<group>"; };
 		7CC15767C2FC164A9A5966E0 /* MediaViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaViewer.swift; sourceTree = "<group>"; };
 		8518560112B1EFF67EA50DBB /* InstagramSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramSource.swift; sourceTree = "<group>"; };
+		8827A31D333E2CB64B40A37D /* Demo */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Demo; path = SavediOSUITests/Demo; sourceTree = SOURCE_ROOT; };
 		95DDFCF92718007FF6FE99ED /* RedditSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedditSource.swift; sourceTree = "<group>"; };
 		A1F1711D5C9AF8EF46F92896 /* FeedCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCache.swift; sourceTree = "<group>"; };
 		AAC310E7DA5347BC381633C3 /* SavedFeedsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedFeedsApp.swift; sourceTree = "<group>"; };
 		ABC564EF4827885057BA7DBC /* SharedSessions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSessions.swift; sourceTree = "<group>"; };
+		ACF42C7C3F825D5A5B4BA896 /* SavedFeedsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedFeedsUITests.swift; sourceTree = "<group>"; };
 		AF5D2C764B295644A9A09A72 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AFE90DB26C55D5C32DD8738A /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		B2CCA10A27DF842B24F278CA /* FeedColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedColumn.swift; sourceTree = "<group>"; };
@@ -139,6 +150,7 @@
 		C5296D47CD1E9C3055B34433 /* SavedFeedsiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedFeedsiOSApp.swift; sourceTree = "<group>"; };
 		C9E264145022737C5EDCCD2E /* CommentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsSection.swift; sourceTree = "<group>"; };
 		CD78569229322CDF7458612A /* SavedFeedsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SavedFeedsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0601FB4A79AA7F883DD6056 /* SavediOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SavediOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3883B205955D6F54CE6EFD1 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		D70025552DD8F606BF236A78 /* PhoneMedia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneMedia.swift; sourceTree = "<group>"; };
 		D7937699F8E7851BBB252780 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -203,6 +215,15 @@
 			path = SafariExtension;
 			sourceTree = "<group>";
 		};
+		8DC6B5242E748855230A48EB /* SavediOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				8827A31D333E2CB64B40A37D /* Demo */,
+				ACF42C7C3F825D5A5B4BA896 /* SavedFeedsUITests.swift */,
+			);
+			path = SavediOSUITests;
+			sourceTree = "<group>";
+		};
 		929AABC87EDFA87259CB9078 /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -230,6 +251,7 @@
 				46759A46177D86ACF6B45261 /* SavedFeedsiOS.app */,
 				FDD79D13EB4E3A90CF716137 /* SavedFeedsSafari.appex */,
 				CD78569229322CDF7458612A /* SavedFeedsTests.xctest */,
+				D0601FB4A79AA7F883DD6056 /* SavediOSUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -241,6 +263,7 @@
 				29C7A28893D88FC8D31E4AF9 /* SavedFeeds */,
 				351FDD05B748CA02BB207414 /* SavedFeedsTests */,
 				DDB2A2FC58513F28002A4B75 /* SavediOS */,
+				8DC6B5242E748855230A48EB /* SavediOSUITests */,
 				9790AB10D2A2A57414182D25 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -338,6 +361,25 @@
 			productReference = CD78569229322CDF7458612A /* SavedFeedsTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		E89B33E18ED4572712715FC3 /* SavediOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 199E5BD1889358719A5981DF /* Build configuration list for PBXNativeTarget "SavediOSUITests" */;
+			buildPhases = (
+				BFA7B44E76C7B2B0DC5C3110 /* Sources */,
+				E241750CCE8AA3AF25854E57 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9CB93F35F630F36BFC41DE95 /* PBXTargetDependency */,
+			);
+			name = SavediOSUITests;
+			packageProductDependencies = (
+			);
+			productName = SavediOSUITests;
+			productReference = D0601FB4A79AA7F883DD6056 /* SavediOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		F4C9A35D9DA169B63AA6F293 /* SavedFeedsiOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FCD7A301B1D5A9BD51EFF8BE /* Build configuration list for PBXNativeTarget "SavedFeedsiOS" */;
@@ -376,6 +418,11 @@
 					B87A237E5705DA243272FE68 = {
 						DevelopmentTeam = 8FB39RNRQQ;
 					};
+					E89B33E18ED4572712715FC3 = {
+						DevelopmentTeam = 8FB39RNRQQ;
+						ProvisioningStyle = Automatic;
+						TestTargetID = F4C9A35D9DA169B63AA6F293;
+					};
 					F4C9A35D9DA169B63AA6F293 = {
 						DevelopmentTeam = 8FB39RNRQQ;
 						ProvisioningStyle = Automatic;
@@ -399,6 +446,7 @@
 				3F5A4162C2EC477801E42D62 /* SavedFeeds */,
 				183B603D28DDC702DDA27C9E /* SavedFeedsSafari */,
 				F4C9A35D9DA169B63AA6F293 /* SavedFeedsiOS */,
+				E89B33E18ED4572712715FC3 /* SavediOSUITests */,
 				B87A237E5705DA243272FE68 /* SavedFeedsTests */,
 			);
 		};
@@ -430,6 +478,14 @@
 			files = (
 				A1169B9310EAE0B946DAD05A /* AppIcon.icon in Resources */,
 				F8FDA76F357F95827ECCC769 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E241750CCE8AA3AF25854E57 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E37FFFD68F24CD45C91569A /* Demo in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -510,6 +566,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BFA7B44E76C7B2B0DC5C3110 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				462463B796E1D634F05CC7B5 /* SavedFeedsUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DA19FEBDC529D15AA1AFF02B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -526,6 +590,11 @@
 			isa = PBXTargetDependency;
 			target = 3F5A4162C2EC477801E42D62 /* SavedFeeds */;
 			targetProxy = 6F5E74D7FCDE718E0CF42696 /* PBXContainerItemProxy */;
+		};
+		9CB93F35F630F36BFC41DE95 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F4C9A35D9DA169B63AA6F293 /* SavedFeedsiOS */;
+			targetProxy = FD90F92F8766AFDD0DBAB238 /* PBXContainerItemProxy */;
 		};
 		EF8760835E9C6B83AC2BDF5C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -670,6 +739,48 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
+		};
+		91B28FC97C7333F1B776E289 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hreinsson.SavediOSUITests;
+				SDKROOT = iphoneos;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = SavedFeedsiOS;
+			};
+			name = Debug;
+		};
+		9DEA4C630512D54B6DF8AC62 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hreinsson.SavediOSUITests;
+				SDKROOT = iphoneos;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = SavedFeedsiOS;
+			};
+			name = Release;
 		};
 		BD243CAD936E1F3066D9F363 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -831,6 +942,15 @@
 			buildConfigurations = (
 				62E063EF97DE5CEA5AE8641C /* Debug */,
 				022BF77497AAB4C108761948 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		199E5BD1889358719A5981DF /* Build configuration list for PBXNativeTarget "SavediOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				91B28FC97C7333F1B776E289 /* Debug */,
+				9DEA4C630512D54B6DF8AC62 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

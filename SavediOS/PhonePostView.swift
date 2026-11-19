@@ -15,7 +15,7 @@ struct PhonePostView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            PostHeader(post: post, showsMenu: !isDetail)
+            PostHeader(post: post)
                 .padding(.horizontal, 14)
             switch post.service {
             case .reddit: redditBody
@@ -72,10 +72,17 @@ struct PhonePostView: View {
                 }
             }
             Spacer()
-            ShareLink(item: post.permalink) {
-                Chip(systemImage: "square.and.arrow.up", text: nil)
+            OpenInAppButton(post: post) {
+                HStack(spacing: 6) {
+                    ServiceLogo(service: .reddit, size: 18)
+                    Text("Open")
+                }
+                .font(.subheadline.weight(.semibold))
+                .padding(.leading, 8)
+                .padding(.trailing, 12)
+                .frame(height: 32)
+                .background(Color(.tertiarySystemFill), in: .capsule)
             }
-            .buttonStyle(.plain)
         }
         .padding(.horizontal, 14)
     }
@@ -97,10 +104,9 @@ struct PhonePostView: View {
                 }
             }
             Spacer()
-            ShareLink(item: post.permalink) {
-                Image(systemName: "paperplane")
+            OpenInAppButton(post: post) {
+                ServiceLogo(service: .instagram, size: 21, glyph: true)
             }
-            .buttonStyle(.plain)
         }
         .font(.subheadline.weight(.semibold))
         .labelStyle(.titleAndIcon)
@@ -168,10 +174,28 @@ private struct CommentsButton<Label: View>: View {
     }
 }
 
-/// Who and where: Instagram's author with their picture; Reddit's subreddit, author and age.
+/// Opens the post in the Reddit or Instagram app (Safari without it).
+struct OpenInAppButton<Label: View>: View {
+    let post: SavedPost
+    @ViewBuilder let label: () -> Label
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        Button {
+            openURL(post.permalink)
+        } label: {
+            label()
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Open in \(post.service.name)")
+    }
+}
+
+/// Who and where: Instagram's author with their picture; Reddit's subreddit, author and age. Its menu is the long
+/// press, and the post screen's toolbar.
 struct PostHeader: View {
     let post: SavedPost
-    var showsMenu = true
 
     var body: some View {
         HStack(spacing: 10) {
@@ -193,16 +217,8 @@ struct PostHeader: View {
                 .lineLimit(1)
             }
             Spacer(minLength: 0)
-            if showsMenu {
-                PostMenu(post: post) {
-                    Image(systemName: "ellipsis")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 32, height: 32)
-                        .contentShape(.rect)
-                }
-                .tint(.primary)
-            }
         }
+        .frame(minHeight: 34)
     }
 }
 
@@ -275,8 +291,10 @@ struct Avatar: View {
         return letters.first.map { String($0).uppercased() } ?? "?"
     }
 
+    private var color: Color { Self.color(for: name) }
+
     /// The same color for the same name, from a set that reads well under white.
-    private var color: Color {
+    static func color(for name: String) -> Color {
         let palette: [Color] = [.red, .orange, .pink, .purple, .indigo, .blue, .teal, .green, .brown, .mint]
         let hash = name.unicodeScalars.reduce(5381) { ($0 &* 33) &+ Int($1.value) }
         return palette[abs(hash) % palette.count]

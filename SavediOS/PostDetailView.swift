@@ -37,7 +37,10 @@ struct PostDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                ShareLink(item: post.permalink)
+                OpenInAppButton(post: post) {
+                    ServiceLogo(service: post.service, size: 24)
+                        .frame(width: 32, height: 32)
+                }
                 PostMenu(post: post) {
                     Image(systemName: "ellipsis")
                 }

@@ -184,7 +184,11 @@ struct ConnectView: View {
 
     var body: some View {
         ContentUnavailableView {
-            Label("Connect \(service.name)", systemImage: service.symbol)
+            Label {
+                Text("Connect \(service.name)")
+            } icon: {
+                ServiceLogo(service: service, size: 44)
+            }
         } description: {
             switch service {
             case .reddit:
